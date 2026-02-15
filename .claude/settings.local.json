@@ -11,7 +11,9 @@
       "Bash(bin/rails routes:*)",
       "Bash(bin/rails runner:*)",
       "Bash(bin/rails db:seed:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(ssh:*)",
+      "Bash(git commit:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"
