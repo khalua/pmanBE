@@ -28,6 +28,12 @@ Rails.application.routes.draw do
       resources :maintenance_requests, only: [ :show ] do
         resources :quote_requests, only: [ :create ]
       end
+      resources :quotes, only: [] do
+        member do
+          post :approve
+          post :reject
+        end
+      end
     end
     namespace :admin do
       get "dashboard", to: "dashboard#show"

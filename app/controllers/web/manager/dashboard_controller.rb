@@ -9,7 +9,7 @@ class Web::Manager::DashboardController < WebController
     @maintenance_requests = MaintenanceRequest
       .joins(tenant: :unit)
       .where(units: { property_id: @properties.select(:id) })
-      .includes(:tenant, :assigned_vendor)
+      .includes(tenant: { unit: :property }, assigned_vendor: {})
       .order(created_at: :desc)
     @vendors_count = current_user.vendors.count
   end

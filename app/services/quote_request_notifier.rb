@@ -12,7 +12,7 @@ class QuoteRequestNotifier
   def call
     return unless @vendor.phone_number.present?
 
-    base_url = ENV.fetch("BASE_URL", "https://pman-api.yerko.com")
+    base_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
     link = "#{base_url}/quote?token=#{@qr.token}"
 
     body = "New maintenance request:\n" \

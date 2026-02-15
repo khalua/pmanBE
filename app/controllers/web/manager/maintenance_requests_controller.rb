@@ -6,7 +6,7 @@ class Web::Manager::MaintenanceRequestsController < WebController
     @maintenance_request = MaintenanceRequest
       .joins(tenant: :unit)
       .where(units: { property_id: current_user.properties.select(:id) })
-      .includes(:tenant, :assigned_vendor, quote_requests: :vendor)
+      .includes(tenant: { unit: :property }, assigned_vendor: {}, quote_requests: :vendor, quotes: :vendor, images_attachments: :blob)
       .find(params[:id])
     @vendors = current_user.vendors.order(:name)
   end

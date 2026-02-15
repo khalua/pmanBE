@@ -9,7 +9,12 @@ class SmsService
       return nil
     end
 
+    Rails.logger.info("[SmsService] Sending SMS to #{to}: #{body}")
+
     client = Twilio::REST::Client.new(account_sid, auth_token)
     client.messages.create(from: from_number, to: to, body: body)
+  rescue Twilio::REST::RestError => e
+    Rails.logger.error("[SmsService] Twilio error: #{e.message}")
+    nil
   end
 end

@@ -30,6 +30,16 @@
         <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.tenant.name %></dd>
       </div>
       <div>
+        <dt class="text-sm font-medium text-gray-500">Property / Unit</dt>
+        <dd class="mt-1 text-sm text-gray-900">
+          <% if @maintenance_request.tenant.unit %>
+            <%= @maintenance_request.tenant.unit.property.name.presence || @maintenance_request.tenant.unit.property.address %> — Unit <%= @maintenance_request.tenant.unit.identifier %>
+          <% else %>
+            -
+          <% end %>
+        </dd>
+      </div>
+      <div>
         <dt class="text-sm font-medium text-gray-500">Severity</dt>
         <dd class="mt-1">
           <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
@@ -68,6 +78,20 @@
     </dl>
   </div>
 
+  <%# Attached photos %>
+  <% if @maintenance_request.images.attached? %>
+    <div class="mt-6 bg-white shadow rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Photos</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <% @maintenance_request.images.each do |image| %>
+          <a href="<%= rails_blob_path(image, disposition: "inline") %>" target="_blank" class="block">
+            <%= image_tag rails_blob_path(image, disposition: "inline"), class: "w-full h-40 object-cover rounded-lg border border-gray-200 hover:opacity-80 transition" %>
+          </a>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
   <%# Existing quote requests %>
   <div class="mt-6 bg-white shadow rounded-lg p-6">
     <h2 class="text-lg font-semibold text-gray-900 mb-4">Quote Requests</h2>
@@ -104,6 +128,47 @@
       <p class="text-sm text-gray-400">No quote requests yet.</p>
     <% end %>
   </div>
+
+  <%# Quotes received %>
+  <% if @maintenance_request.quotes.any? %>
+    <div class="mt-6 bg-white shadow rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Quotes Received</h2>
+      <% total_requests = @maintenance_request.quote_requests.size %>
+      <% responded = @maintenance_request.quotes.size %>
+      <% if responded < total_requests %>
+        <p class="text-sm text-gray-500 mb-4"><%= responded %> of <%= total_requests %> vendors have responded.</p>
+      <% end %>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Estimated Cost</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Work Description</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Est. Arrival</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% @maintenance_request.quotes.each do |quote| %>
+              <tr>
+                <td class="px-4 py-2 text-sm text-gray-900"><%= quote.vendor&.name || "Unknown" %></td>
+                <td class="px-4 py-2 text-sm text-gray-900"><%= number_to_currency(quote.estimated_cost) %></td>
+                <td class="px-4 py-2 text-sm text-gray-900"><%= quote.work_description %></td>
+                <td class="px-4 py-2 text-sm text-gray-500"><%= quote.estimated_arrival_time&.strftime("%b %d, %Y %l:%M %p") || "-" %></td>
+                <td class="px-4 py-2 text-sm">
+                  <div class="flex items-center gap-2">
+                    <%= button_to "Approve", approve_web_manager_quote_path(quote), method: :post, form: { class: "inline" }, class: "px-3 py-1 text-xs font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer" %>
+                    <%= button_to "Reject", reject_web_manager_quote_path(quote), method: :post, form: { class: "inline" }, class: "px-3 py-1 text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 cursor-pointer" %>
+                  </div>
+                </td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
 
   <%# Send quote requests form %>
   <% already_requested_ids = @maintenance_request.quote_requests.pluck(:vendor_id) %>

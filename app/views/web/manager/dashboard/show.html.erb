@@ -1,8 +1,8 @@
-<% content_for(:title) { "Manager Dashboard - Prompt" } %>
+<% content_for(:title) { "Property Manager Dashboard - Prompt" } %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
+    <h1 class="text-2xl font-bold text-gray-900">Property Manager Dashboard</h1>
     <%= link_to "Manage Vendors", web_manager_vendors_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700" %>
   </div>
 
@@ -85,6 +85,7 @@
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Issue</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tenant</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Property / Unit</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
@@ -96,6 +97,13 @@
               <td class="px-4 py-3 text-sm text-gray-900"><%= req.issue_type %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.location %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.tenant.name %></td>
+              <td class="px-4 py-3 text-sm text-gray-500">
+                <% if req.tenant.unit %>
+                  <%= req.tenant.unit.property.name.presence || req.tenant.unit.property.address %> — Unit <%= req.tenant.unit.identifier %>
+                <% else %>
+                  -
+                <% end %>
+              </td>
               <td class="px-4 py-3">
                 <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
                   <%= case req.severity
@@ -123,7 +131,7 @@
           <% end %>
           <% if @maintenance_requests.empty? %>
             <tr>
-              <td colspan="6" class="px-4 py-6 text-sm text-gray-400 text-center">No maintenance requests</td>
+              <td colspan="7" class="px-4 py-6 text-sm text-gray-400 text-center">No maintenance requests</td>
             </tr>
           <% end %>
         </tbody>

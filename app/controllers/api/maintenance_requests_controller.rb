@@ -9,7 +9,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
       MaintenanceRequest.all
     end
 
-    render json: requests.includes(:tenant, :assigned_vendor, :quotes).order(created_at: :desc).map { |r| request_json(r) }
+    render json: requests.includes(tenant: { unit: :property }, assigned_vendor: {}, quotes: {}).order(created_at: :desc).map { |r| request_json(r) }
   end
 
   def show
@@ -87,7 +87,11 @@ class Api::MaintenanceRequestsController < Api::BaseController
       status: r.status,
       conversation_summary: r.conversation_summary,
       allows_direct_contact: r.allows_direct_contact,
-      tenant: { id: r.tenant.id, name: r.tenant.name, phone: r.tenant.phone, address: r.tenant.address },
+      tenant: {
+        id: r.tenant.id, name: r.tenant.name, phone: r.tenant.phone, address: r.tenant.address,
+        unit: r.tenant.unit ? { id: r.tenant.unit.id, identifier: r.tenant.unit.identifier, floor: r.tenant.unit.floor } : nil,
+        property: r.tenant.unit&.property ? { id: r.tenant.unit.property.id, name: r.tenant.unit.property.name, address: r.tenant.unit.property.address, property_type: r.tenant.unit.property.property_type } : nil
+      },
       assigned_vendor: r.assigned_vendor ? { id: r.assigned_vendor.id, name: r.assigned_vendor.name, phone_number: r.assigned_vendor.phone_number, rating: r.assigned_vendor.rating.to_f, is_available: r.assigned_vendor.is_available, location: r.assigned_vendor.location, vendor_type: r.assigned_vendor.vendor_type, specialties: r.assigned_vendor.specialties } : nil,
       image_urls: r.images.map { |img| rails_blob_url(img, disposition: "inline") },
       quotes: r.quotes.map { |q| { id: q.id, estimated_cost: q.estimated_cost.to_f, work_description: q.work_description, estimated_arrival_time: q.estimated_arrival_time } },
