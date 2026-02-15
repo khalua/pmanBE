@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= content_for(:title) || "PropMan" %></title>
+  <title><%= content_for(:title) || "Prompt" %></title>
   <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
   <%= javascript_importmap_tags %>
 </head>
@@ -12,7 +12,7 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between h-16">
         <div class="flex items-center">
-          <%= link_to "PropMan", root_path, class: "text-xl font-bold text-indigo-600" %>
+          <%= link_to "Prompt", root_path, class: "text-xl font-bold text-indigo-600" %>
         </div>
         <div class="flex items-center space-x-4">
           <% if current_user %>
@@ -50,7 +50,7 @@
   <footer class="bg-white border-t mt-auto">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div class="flex justify-between items-center">
-        <p class="text-gray-400 text-sm">&copy; <%= Date.current.year %> PropMan. All rights reserved.</p>
+        <p class="text-gray-400 text-sm">&copy; <%= Date.current.year %> Prompt. All rights reserved.</p>
         <div class="space-x-4">
           <%= link_to "Privacy", privacy_path, class: "text-sm text-gray-400 hover:text-gray-600" %>
           <%= link_to "Terms", terms_path, class: "text-sm text-gray-400 hover:text-gray-600" %>
