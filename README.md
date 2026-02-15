@@ -2,6 +2,8 @@
 
 Rails 7.2 API-only backend for a property management application. Handles maintenance requests, vendor quoting, and tenant/manager workflows with JWT authentication and AI-powered chat.
 
+**Production URL:** https://pman-api.yerko.com
+
 ## Tech Stack
 
 - **Ruby on Rails 7.2** (API-only mode)
