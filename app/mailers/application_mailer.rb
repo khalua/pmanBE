@@ -1,4 +1,4 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: "PropMan <noreply@yerko.com>"
+  default from: "Prompt <noreply@yerko.com>"
   layout "mailer"
 end
