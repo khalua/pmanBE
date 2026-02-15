@@ -1,0 +1,130 @@
+<% content_for(:title) { "Maintenance Request ##{@maintenance_request.id} - Prompt" } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Maintenance Request #<%= @maintenance_request.id %></h1>
+    <%= link_to "Back to Dashboard", web_manager_dashboard_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+  </div>
+
+  <% if flash[:notice] %>
+    <div class="mt-4 bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg"><%= flash[:notice] %></div>
+  <% end %>
+  <% if flash[:alert] %>
+    <div class="mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg"><%= flash[:alert] %></div>
+  <% end %>
+
+  <%# Request details %>
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Details</h2>
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Issue Type</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.issue_type %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Location</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.location %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Tenant</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.tenant.name %></dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Severity</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+            <%= case @maintenance_request.severity
+                when 'emergency' then 'bg-red-100 text-red-800'
+                when 'urgent' then 'bg-orange-100 text-orange-800'
+                when 'moderate' then 'bg-yellow-100 text-yellow-800'
+                else 'bg-gray-100 text-gray-800'
+                end %>">
+            <%= @maintenance_request.severity.humanize %>
+          </span>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Status</dt>
+        <dd class="mt-1">
+          <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+            <%= case @maintenance_request.status
+                when 'submitted' then 'bg-yellow-100 text-yellow-800'
+                when 'completed' then 'bg-green-100 text-green-800'
+                when 'in_progress' then 'bg-blue-100 text-blue-800'
+                else 'bg-gray-100 text-gray-800'
+                end %>">
+            <%= @maintenance_request.status.humanize %>
+          </span>
+        </dd>
+      </div>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Assigned Vendor</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.assigned_vendor&.name || "None" %></dd>
+      </div>
+      <div class="sm:col-span-2">
+        <dt class="text-sm font-medium text-gray-500">Summary</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.conversation_summary %></dd>
+      </div>
+    </dl>
+  </div>
+
+  <%# Existing quote requests %>
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Quote Requests</h2>
+    <% if @maintenance_request.quote_requests.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Sent At</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @maintenance_request.quote_requests.each do |qr| %>
+            <tr>
+              <td class="px-4 py-2 text-sm text-gray-900"><%= qr.vendor.name %></td>
+              <td class="px-4 py-2">
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+                  <%= case qr.status
+                      when 'sent' then 'bg-blue-100 text-blue-800'
+                      when 'quoted' then 'bg-green-100 text-green-800'
+                      when 'declined' then 'bg-red-100 text-red-800'
+                      else 'bg-gray-100 text-gray-800'
+                      end %>">
+                  <%= qr.status.humanize %>
+                </span>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-500"><%= qr.created_at.strftime("%b %d, %Y %l:%M %p") %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="text-sm text-gray-400">No quote requests yet.</p>
+    <% end %>
+  </div>
+
+  <%# Send quote requests form %>
+  <% already_requested_ids = @maintenance_request.quote_requests.pluck(:vendor_id) %>
+  <% requestable_vendors = @vendors.where.not(id: already_requested_ids) %>
+  <% if requestable_vendors.any? %>
+    <div class="mt-6 bg-white shadow rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Quotes</h2>
+      <%= form_with url: web_manager_maintenance_request_quote_requests_path(@maintenance_request), method: :post do |f| %>
+        <div class="space-y-3">
+          <% requestable_vendors.each do |vendor| %>
+            <label class="flex items-center gap-3 cursor-pointer">
+              <input type="checkbox" name="vendor_ids[]" value="<%= vendor.id %>" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              <span class="text-sm text-gray-900"><%= vendor.name %></span>
+              <span class="text-xs text-gray-500">(<%= vendor.vendor_type %>)</span>
+            </label>
+          <% end %>
+        </div>
+        <div class="mt-4">
+          <%= f.submit "Send Quote Requests", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

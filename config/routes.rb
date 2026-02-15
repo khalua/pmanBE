@@ -24,6 +24,10 @@ Rails.application.routes.draw do
     end
     namespace :manager do
       get "dashboard", to: "dashboard#show"
+      resources :vendors, only: [ :index, :create, :destroy ]
+      resources :maintenance_requests, only: [ :show ] do
+        resources :quote_requests, only: [ :create ]
+      end
     end
     namespace :admin do
       get "dashboard", to: "dashboard#show"

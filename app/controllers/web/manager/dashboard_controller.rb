@@ -11,6 +11,7 @@ class Web::Manager::DashboardController < WebController
       .where(units: { property_id: @properties.select(:id) })
       .includes(:tenant, :assigned_vendor)
       .order(created_at: :desc)
+    @vendors_count = current_user.vendors.count
   end
 
   private

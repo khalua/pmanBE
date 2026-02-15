@@ -1,9 +1,12 @@
 <% content_for(:title) { "Manager Dashboard - Prompt" } %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <h1 class="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Manager Dashboard</h1>
+    <%= link_to "Manage Vendors", web_manager_vendors_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700" %>
+  </div>
 
-  <div class="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-6">
+  <div class="mt-6 grid grid-cols-1 sm:grid-cols-4 gap-6">
     <div class="bg-white rounded-lg shadow p-6">
       <p class="text-sm font-medium text-gray-500">Properties</p>
       <p class="mt-2 text-3xl font-bold text-gray-900"><%= @properties.size %></p>
@@ -15,6 +18,10 @@
     <div class="bg-white rounded-lg shadow p-6">
       <p class="text-sm font-medium text-gray-500">Occupied Units</p>
       <p class="mt-2 text-3xl font-bold text-gray-900"><%= @occupied_units %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-6">
+      <p class="text-sm font-medium text-gray-500">Vendors</p>
+      <p class="mt-2 text-3xl font-bold text-gray-900"><%= @vendors_count %></p>
     </div>
   </div>
 
@@ -85,7 +92,7 @@
         </thead>
         <tbody class="divide-y divide-gray-200">
           <% @maintenance_requests.each do |req| %>
-            <tr>
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_manager_maintenance_request_path(req) %>'">
               <td class="px-4 py-3 text-sm text-gray-900"><%= req.issue_type %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.location %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.tenant.name %></td>
