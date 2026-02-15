@@ -1,6 +1,9 @@
 class Vendor < ApplicationRecord
   has_many :quotes, dependent: :destroy
   has_many :assigned_requests, class_name: "MaintenanceRequest", foreign_key: :assigned_vendor_id
+  has_many :property_manager_vendors, dependent: :destroy
+  has_many :property_managers, through: :property_manager_vendors, source: :user
+  has_many :quote_requests, dependent: :destroy
 
   enum :vendor_type, {
     plumbing: 0,

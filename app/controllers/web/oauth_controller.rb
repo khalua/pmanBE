@@ -19,7 +19,11 @@ class Web::OauthController < WebController
     end
 
     session[:user_id] = user.id
-    redirect_to root_path, notice: "Logged in with Google."
+    if user.super_admin?
+      redirect_to web_admin_dashboard_path, notice: "Logged in with Google."
+    else
+      redirect_to root_path, notice: "Logged in with Google."
+    end
   end
 
   def failure

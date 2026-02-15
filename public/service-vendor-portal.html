@@ -387,6 +387,7 @@
         const urlParams = new URLSearchParams(window.location.search);
         const requestId = urlParams.get('id') || 'sample-request-123';
         const isApproved = false;
+        const vendorId = null;
         
         // Set default arrival date to tomorrow
         const tomorrow = new Date();
@@ -409,6 +410,7 @@
                 workDescription: formData.get('work-description'),
                 submittedAt: new Date().toISOString()
             };
+            if (vendorId) { quote.vendor_id = vendorId; }
             
             // Simulate quote submission
             console.log('Submitting quote:', quote);

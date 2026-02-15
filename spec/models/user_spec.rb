@@ -17,9 +17,11 @@ RSpec.describe User, type: :model do
 
   describe "associations" do
     it { is_expected.to have_many(:maintenance_requests).with_foreign_key(:tenant_id).dependent(:destroy) }
+    it { is_expected.to have_many(:properties).with_foreign_key(:property_manager_id).dependent(:destroy) }
+    it { is_expected.to belong_to(:unit).optional }
   end
 
   describe "enums" do
-    it { is_expected.to define_enum_for(:role).with_values(tenant: 0, property_manager: 1) }
+    it { is_expected.to define_enum_for(:role).with_values(tenant: 0, property_manager: 1, super_admin: 2) }
   end
 end

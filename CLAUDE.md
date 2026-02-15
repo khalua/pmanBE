@@ -21,13 +21,17 @@ Rails 7.2 API-only backend for a property management app. PostgreSQL database, J
 
 **Auth**: JWT-based via `Api::BaseController#authenticate_user!`. Tokens issued by `JwtService` (`app/services/jwt_service.rb`). Auth endpoints (register/login/me) are in `Api::AuthController` and skip authentication.
 
-**User roles** (enum): `tenant` (0), `property_manager` (1). Uses `bcrypt` / `has_secure_password`.
+**User roles** (enum): `tenant` (0), `property_manager` (1), `super_admin` (2). Uses `bcrypt` / `has_secure_password`.
 
 **Core domain models**:
-- `User` → has_many `MaintenanceRequest` (via `tenant_id`)
+- `User` → belongs_to `Unit` (optional, tenants only), has_many `Property` (via `property_manager_id`), has_many `MaintenanceRequest` (via `tenant_id`)
+- `Property` → belongs_to `User` (as `property_manager`), has_many `Unit`. Enum `property_type`: `house` (0), `building` (1)
+- `Unit` → belongs_to `Property`, has_one `User` (as `tenant`)
 - `MaintenanceRequest` → belongs_to `Vendor` (optional, `assigned_vendor_id`), has_many `Quote`, has_many_attached `images` (Active Storage)
 - `Vendor` → has_many `Quote`
 - `Quote` → belongs_to `Vendor` + `MaintenanceRequest`
+
+**Admin**: Web admin dashboard at `/web/admin/` and API admin at `/api/admin/`. Both require `super_admin` role. CRUD for users, properties, units, and maintenance requests.
 
 **Maintenance request lifecycle** (status enum): `submitted` → `vendor_quote_requested` → `quote_received` → `quote_accepted`/`quote_rejected` → `in_progress` → `completed`
 

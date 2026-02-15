@@ -2,6 +2,7 @@ class MaintenanceRequest < ApplicationRecord
   belongs_to :tenant, class_name: "User"
   belongs_to :assigned_vendor, class_name: "Vendor", optional: true
   has_many :quotes, dependent: :destroy
+  has_many :quote_requests, dependent: :destroy
   has_many_attached :images
 
   enum :severity, { minor: 0, moderate: 1, urgent: 2, emergency: 3 }

@@ -10,5 +10,9 @@ FactoryBot.define do
     trait :property_manager do
       role { :property_manager }
     end
+
+    trait :super_admin do
+      role { :super_admin }
+    end
   end
 end

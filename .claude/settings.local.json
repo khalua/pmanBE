@@ -5,7 +5,13 @@
       "Bash(bundle install:*)",
       "Bash(bundle exec rubocop:*)",
       "Bash(bin/rails generate rspec:install:*)",
-      "Bash(bundle exec rspec:*)"
+      "Bash(bundle exec rspec:*)",
+      "Bash(bin/rails generate:*)",
+      "Bash(bin/rails db:migrate:*)",
+      "Bash(bin/rails routes:*)",
+      "Bash(bin/rails runner:*)",
+      "Bash(bin/rails db:seed:*)",
+      "Bash(ls:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

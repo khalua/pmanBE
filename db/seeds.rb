@@ -1,3 +1,5 @@
+abort("Seeds are for development/test only!") if Rails.env.production?
+
 puts "Seeding database..."
 
 # Users
@@ -7,6 +9,12 @@ tenant = User.find_or_create_by!(email: "tenant@example.com") do |u|
   u.phone = "555-123-4567"
   u.address = "123 Main St, Apt 4B, City, State 12345"
   u.role = :tenant
+end
+
+admin = User.find_or_create_by!(email: "admin@example.com") do |u|
+  u.name = "Super Admin"
+  u.password = "password123"
+  u.role = :super_admin
 end
 
 manager = User.find_or_create_by!(email: "manager@example.com") do |u|
@@ -62,6 +70,38 @@ vendors_data.each do |data|
   end
 end
 
+# Properties & Units
+building = Property.find_or_create_by!(address: "456 Oak Avenue, City, State 12345") do |p|
+  p.name = "Sunset Apartments"
+  p.property_type = :building
+  p.property_manager = manager
+end
+
+house = Property.find_or_create_by!(address: "789 Elm Street, City, State 12345") do |p|
+  p.name = "Elm House"
+  p.property_type = :house
+  p.property_manager = manager
+end
+
+unit_4b = Unit.find_or_create_by!(property: building, identifier: "Apt 4B") do |u|
+  u.floor = 4
+end
+
+Unit.find_or_create_by!(property: building, identifier: "Apt 3A") do |u|
+  u.floor = 3
+end
+
+Unit.find_or_create_by!(property: building, identifier: "Apt 2C") do |u|
+  u.floor = 2
+end
+
+Unit.find_or_create_by!(property: house, identifier: "Main") do |u|
+  u.floor = 1
+end
+
+# Assign tenant to unit
+tenant.update!(unit: unit_4b) if tenant.unit.nil?
+
 # Sample maintenance request
 MaintenanceRequest.find_or_create_by!(tenant: tenant, issue_type: "Leaking kitchen faucet") do |r|
   r.location = "Kitchen"
@@ -71,4 +111,4 @@ MaintenanceRequest.find_or_create_by!(tenant: tenant, issue_type: "Leaking kitch
   r.allows_direct_contact = true
 end
 
-puts "Seeded #{User.count} users, #{Vendor.count} vendors, #{MaintenanceRequest.count} maintenance requests"
+puts "Seeded #{User.count} users, #{Vendor.count} vendors, #{Property.count} properties, #{Unit.count} units, #{MaintenanceRequest.count} maintenance requests"

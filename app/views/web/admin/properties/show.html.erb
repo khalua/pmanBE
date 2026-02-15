@@ -1,0 +1,72 @@
+<% content_for(:title) { "#{@property.name || @property.address} - Prompt" } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900"><%= @property.name.presence || @property.address %></h1>
+      <p class="mt-1 text-sm text-gray-500"><%= @property.address %></p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to "Back", web_admin_properties_path, class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+      <%= link_to "Edit Property", edit_web_admin_property_path(@property), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+      <%= link_to "Add Unit", new_web_admin_property_unit_path(@property), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+    </div>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Type</p>
+      <p class="mt-1 text-lg font-semibold text-gray-900"><%= @property.property_type.humanize %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Manager</p>
+      <p class="mt-1 text-lg font-semibold text-gray-900"><%= @property.property_manager.name %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Units</p>
+      <p class="mt-1 text-lg font-semibold text-gray-900"><%= @units.size %></p>
+    </div>
+  </div>
+
+  <div class="mt-8">
+    <h2 class="text-lg font-semibold text-gray-900">Units</h2>
+    <div class="mt-4 bg-white shadow rounded-lg overflow-hidden">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Identifier</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Floor</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tenant</th>
+            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @units.each do |unit| %>
+            <tr>
+              <td class="px-4 py-3 text-sm font-medium text-gray-900"><%= unit.identifier %></td>
+              <td class="px-4 py-3 text-sm text-gray-500"><%= unit.floor || "-" %></td>
+              <td class="px-4 py-3 text-sm text-gray-500">
+                <% if unit.tenant %>
+                  <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"><%= unit.tenant.name %></span>
+                <% else %>
+                  <span class="text-gray-400">Vacant</span>
+                <% end %>
+              </td>
+              <td class="px-4 py-3 text-sm flex gap-2">
+                <%= link_to "Edit", edit_web_admin_property_unit_path(@property, unit), class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+                <%= button_to "Delete", web_admin_property_unit_path(@property, unit), method: :delete,
+                      data: { turbo_confirm: "Delete unit #{unit.identifier}?" },
+                      class: "text-red-600 hover:text-red-800 font-medium" %>
+              </td>
+            </tr>
+          <% end %>
+          <% if @units.empty? %>
+            <tr>
+              <td colspan="4" class="px-4 py-6 text-sm text-gray-400 text-center">No units yet.</td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

@@ -7,7 +7,13 @@ class Web::SessionsController < WebController
 
     if user&.authenticate(params[:password])
       session[:user_id] = user.id
-      redirect_to root_path, notice: "Logged in successfully."
+      if user.super_admin?
+        redirect_to web_admin_dashboard_path, notice: "Logged in successfully."
+      elsif user.property_manager?
+        redirect_to web_manager_dashboard_path, notice: "Logged in successfully."
+      else
+        redirect_to web_tenant_dashboard_path, notice: "Logged in successfully."
+      end
     else
       flash.now[:alert] = "Invalid email or password."
       render :new, status: :unprocessable_entity

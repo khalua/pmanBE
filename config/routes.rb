@@ -18,6 +18,22 @@ Rails.application.routes.draw do
   get "reset_password", to: "web/password_resets#edit"
   patch "reset_password", to: "web/password_resets#update"
 
+  namespace :web do
+    namespace :tenant do
+      get "dashboard", to: "dashboard#show"
+    end
+    namespace :manager do
+      get "dashboard", to: "dashboard#show"
+    end
+    namespace :admin do
+      get "dashboard", to: "dashboard#show"
+      resources :users, only: [ :index, :destroy ]
+      resources :properties, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
+        resources :units, only: [ :new, :create, :edit, :update, :destroy ]
+      end
+    end
+  end
+
   # OmniAuth
   get "/auth/google_oauth2/callback", to: "web/oauth#google"
   get "/auth/failure", to: "web/oauth#failure"
@@ -47,6 +63,22 @@ Rails.application.routes.draw do
     post "summarize", to: "chat#summarize"
 
     post "reset", to: "reset#create"
+
+    namespace :manager do
+      resources :vendors, only: [ :index, :show, :create, :destroy ]
+      resources :maintenance_requests, only: [] do
+        resources :quote_requests, only: [ :index, :create ]
+      end
+    end
+
+    namespace :admin do
+      get "dashboard", to: "dashboard#show"
+      resources :users, only: [ :index, :destroy ]
+      resources :maintenance_requests, only: [ :index ]
+      resources :properties, only: [ :index, :show, :create, :update, :destroy ] do
+        resources :units, only: [ :create, :update, :destroy ]
+      end
+    end
   end
 
   get "quote", to: "vendor_portal#show"

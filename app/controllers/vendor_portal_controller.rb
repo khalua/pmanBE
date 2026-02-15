@@ -1,6 +1,14 @@
 class VendorPortalController < ApplicationController
   def show
-    request_id = params[:id]
+    if params[:token].present?
+      quote_request = QuoteRequest.find_by!(token: params[:token])
+      request_id = quote_request.maintenance_request_id
+      vendor_id = quote_request.vendor_id
+    else
+      request_id = params[:id]
+      vendor_id = nil
+    end
+
     is_approved = params[:approved] == "true"
 
     unless request_id
@@ -34,6 +42,7 @@ class VendorPortalController < ApplicationController
     modified_html = html
       .sub("const requestId = urlParams.get('id') || 'sample-request-123';", "const requestId = '#{request_id}';")
       .sub("const isApproved = false;", "const isApproved = #{is_approved};")
+      .sub("const vendorId = null;", "const vendorId = #{vendor_id ? "'#{vendor_id}'" : 'null'};")
       .sub("issueType: 'Kitchen Sink Leak'", "issueType: '#{request_data[:issueType]}'")
       .sub("location: 'Kitchen sink under cabinet'", "location: '#{request_data[:location]}'")
       .sub("severity: 'moderate'", "severity: '#{request_data[:severity]}'")

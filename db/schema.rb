@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_15_063736) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_15_190844) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -57,6 +57,39 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_15_063736) do
     t.index ["tenant_id"], name: "index_maintenance_requests_on_tenant_id"
   end
 
+  create_table "properties", force: :cascade do |t|
+    t.string "address", null: false
+    t.string "name"
+    t.integer "property_type", default: 0, null: false
+    t.bigint "property_manager_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["property_manager_id"], name: "index_properties_on_property_manager_id"
+  end
+
+  create_table "property_manager_vendors", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "vendor_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "vendor_id"], name: "index_property_manager_vendors_on_user_id_and_vendor_id", unique: true
+    t.index ["user_id"], name: "index_property_manager_vendors_on_user_id"
+    t.index ["vendor_id"], name: "index_property_manager_vendors_on_vendor_id"
+  end
+
+  create_table "quote_requests", force: :cascade do |t|
+    t.bigint "maintenance_request_id", null: false
+    t.bigint "vendor_id", null: false
+    t.integer "status", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "token", default: -> { "gen_random_uuid()" }, null: false
+    t.index ["maintenance_request_id", "vendor_id"], name: "index_quote_requests_on_maintenance_request_id_and_vendor_id", unique: true
+    t.index ["maintenance_request_id"], name: "index_quote_requests_on_maintenance_request_id"
+    t.index ["token"], name: "index_quote_requests_on_token", unique: true
+    t.index ["vendor_id"], name: "index_quote_requests_on_vendor_id"
+  end
+
   create_table "quotes", force: :cascade do |t|
     t.bigint "vendor_id", null: false
     t.bigint "maintenance_request_id", null: false
@@ -67,6 +100,15 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_15_063736) do
     t.datetime "updated_at", null: false
     t.index ["maintenance_request_id"], name: "index_quotes_on_maintenance_request_id"
     t.index ["vendor_id"], name: "index_quotes_on_vendor_id"
+  end
+
+  create_table "units", force: :cascade do |t|
+    t.bigint "property_id", null: false
+    t.string "identifier"
+    t.integer "floor"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["property_id"], name: "index_units_on_property_id"
   end
 
   create_table "users", force: :cascade do |t|
@@ -82,8 +124,10 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_15_063736) do
     t.string "uid"
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
+    t.bigint "unit_id"
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
+    t.index ["unit_id"], name: "index_users_on_unit_id"
   end
 
   create_table "vendors", force: :cascade do |t|
@@ -102,6 +146,13 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_15_063736) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "maintenance_requests", "users", column: "tenant_id"
   add_foreign_key "maintenance_requests", "vendors", column: "assigned_vendor_id"
+  add_foreign_key "properties", "users", column: "property_manager_id"
+  add_foreign_key "property_manager_vendors", "users"
+  add_foreign_key "property_manager_vendors", "vendors"
+  add_foreign_key "quote_requests", "maintenance_requests"
+  add_foreign_key "quote_requests", "vendors"
   add_foreign_key "quotes", "maintenance_requests"
   add_foreign_key "quotes", "vendors"
+  add_foreign_key "units", "properties"
+  add_foreign_key "users", "units"
 end
