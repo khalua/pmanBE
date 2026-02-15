@@ -1,5 +1,12 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(find:*)",
+      "Bash(bundle install:*)",
+      "Bash(bundle exec rubocop:*)",
+      "Bash(bin/rails generate rspec:install:*)",
+      "Bash(bundle exec rspec:*)"
+    ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"
     ]

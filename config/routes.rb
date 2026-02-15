@@ -1,6 +1,28 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # Web routes
+  root "pages#landing"
+  get "privacy", to: "pages#privacy"
+  get "terms", to: "pages#terms"
+
+  get "login", to: "web/sessions#new"
+  post "login", to: "web/sessions#create"
+  delete "logout", to: "web/sessions#destroy"
+
+  get "register", to: "web/registrations#new"
+  post "register", to: "web/registrations#create"
+
+  get "forgot_password", to: "web/password_resets#new"
+  post "forgot_password", to: "web/password_resets#create"
+  get "reset_password", to: "web/password_resets#edit"
+  patch "reset_password", to: "web/password_resets#update"
+
+  # OmniAuth
+  get "/auth/google_oauth2/callback", to: "web/oauth#google"
+  get "/auth/failure", to: "web/oauth#failure"
+
+  # API routes
   namespace :api do
     post "register", to: "auth#register"
     post "login", to: "auth#login"

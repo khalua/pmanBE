@@ -31,14 +31,25 @@ Rails.application.configure do
   # Store uploaded files on the local file system (see config/storage.yml for options).
   config.active_storage.service = :local
 
-  # Don't care if the mailer can't send.
-  config.action_mailer.raise_delivery_errors = false
+  # Raise delivery errors so we catch issues in dev.
+  config.action_mailer.raise_delivery_errors = true
 
   # Disable caching for Action Mailer templates even if Action Controller
   # caching is enabled.
   config.action_mailer.perform_caching = false
 
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
+
+  # Resend SMTP
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address: "smtp.resend.com",
+    port: 465,
+    user_name: "resend",
+    password: ENV["RESEND_API_KEY"],
+    authentication: :plain,
+    tls: true
+  }
 
   # Required for Active Storage URLs (rails_blob_url) in API controllers
   Rails.application.routes.default_url_options[:host] = "localhost:3000"
