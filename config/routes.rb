@@ -20,5 +20,13 @@ Rails.application.routes.draw do
         post :reject
       end
     end
+
+    post "chat", to: "chat#chat"
+    post "summarize", to: "chat#summarize"
+
+    post "reset", to: "reset#create"
   end
+
+  get "quote", to: "vendor_portal#show"
+  get "health", to: "health#show"
 end

@@ -1,7 +1,28 @@
 class Api::QuotesController < Api::BaseController
+  skip_before_action :authenticate_user!, only: [ :create ]
+
   def create
-    request = MaintenanceRequest.find(params[:maintenance_request_id])
-    quote = request.quotes.build(quote_params)
+    # Support both Rails-style and vendor portal field names
+    req_id = params[:maintenance_request_id] || params[:requestId]
+    request = MaintenanceRequest.find(req_id)
+
+    # Map vendor portal fields to model fields
+    mapped = {}
+    mapped[:vendor_id] = params[:vendor_id] if params[:vendor_id].present?
+    mapped[:estimated_cost] = params[:estimated_cost] || params[:cost]
+    mapped[:work_description] = params[:work_description] || params[:workDescription]
+
+    if params[:estimated_arrival_time].present?
+      mapped[:estimated_arrival_time] = params[:estimated_arrival_time]
+    elsif params[:arrivalDate].present?
+      time_str = params[:arrivalTime] || "09:00"
+      mapped[:estimated_arrival_time] = "#{params[:arrivalDate]} #{time_str}"
+    end
+
+    # Auto-assign vendor if one is assigned to the request and none specified
+    mapped[:vendor_id] ||= request.assigned_vendor_id
+
+    quote = request.quotes.build(mapped)
 
     if quote.save
       request.update!(status: :quote_received)

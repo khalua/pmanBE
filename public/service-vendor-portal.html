@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maintenance Request - Quote Submission</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f5f5f7;
+            color: #1d1d1f;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #007AFF;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .request-details {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e5e5ea;
+        }
+        
+        .detail-row:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .label {
+            font-weight: 600;
+            color: #8e8e93;
+            flex: 1;
+        }
+        
+        .value {
+            flex: 2;
+            text-align: right;
+        }
+        
+        .photos {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .photos h3 {
+            margin-bottom: 15px;
+            color: #1d1d1f;
+        }
+        
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .photo-placeholder {
+            background: #f2f2f7;
+            border: 2px dashed #c7c7cc;
+            border-radius: 8px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8e8e93;
+            font-size: 14px;
+        }
+        
+        .quote-form {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .quote-form h3 {
+            margin-bottom: 20px;
+            color: #1d1d1f;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1d1d1f;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d1d6;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #fafafa;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #007AFF;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .datetime-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .submit-btn {
+            background: #007AFF;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        
+        .submit-btn:hover {
+            background: #0056b3;
+        }
+        
+        .submit-btn:disabled {
+            background: #c7c7cc;
+            cursor: not-allowed;
+        }
+        
+        .success-message {
+            background: #34c759;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .severity-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .severity-minor { background: #e3f2fd; color: #1976d2; }
+        .severity-moderate { background: #fff3e0; color: #f57c00; }
+        .severity-urgent { background: #fce4ec; color: #c2185b; }
+        .severity-emergency { background: #ffebee; color: #d32f2f; }
+        
+        .approved-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 2px solid #34c759;
+            margin-bottom: 20px;
+        }
+        
+        .approved-message {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .approved-message h3 {
+            color: #34c759;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+        
+        .tenant-contact {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .tenant-contact h4 {
+            color: #1d1d1f;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 8px;
+        }
+        
+        .contact-info p {
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        
+        .contact-info strong {
+            color: #007AFF;
+        }
+        
+        .instructions {
+            background: #e7f3ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        
+        .instructions h4 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+        
+        .instructions p {
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .datetime-group {
+                grid-template-columns: 1fr;
+            }
+            
+            .detail-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .value {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 id="header-title">Maintenance Request</h1>
+            <p id="header-subtitle">Please review the details below and submit your quote for this maintenance request.</p>
+        </div>
+        
+        <div class="approved-section" id="approved-section" style="display: none;">
+            <div class="approved-message">
+                <h3>🎉 Quote Approved!</h3>
+                <p>Your quote has been accepted by the property manager.</p>
+            </div>
+            
+            <div class="tenant-contact">
+                <h4>Tenant Contact Information</h4>
+                <div class="contact-info">
+                    <p><strong>Name:</strong> John Doe</p>
+                    <p><strong>Phone:</strong> (555) 123-4567</p>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h4>Next Steps</h4>
+                <p>Please contact the tenant directly to coordinate your arrival time and any additional details.</p>
+                <p>The tenant is expecting your call and is ready to schedule the service.</p>
+            </div>
+        </div>
+        
+        <div class="request-details">
+            <h3>Request Details</h3>
+            <div class="detail-row">
+                <span class="label">Issue Type:</span>
+                <span class="value" id="issue-type">Kitchen Sink Leak</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Location:</span>
+                <span class="value" id="location">Kitchen sink under cabinet</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Severity:</span>
+                <span class="value">
+                    <span class="severity-badge severity-moderate" id="severity">Moderate</span>
+                </span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Property Address:</span>
+                <span class="value" id="address">123 Main St, Apt 4B, City, State 12345</span>
+            </div>
+            <div class="detail-row" id="tenant-contact-row" style="display: none;">
+                <span class="label">Tenant Contact:</span>
+                <span class="value" id="tenant-contact">John Doe - (555) 123-4567</span>
+            </div>
+            <div class="detail-row">
+                <span class="label">Reported:</span>
+                <span class="value" id="reported-time">Today at 2:30 PM</span>
+            </div>
+        </div>
+        
+        <div class="photos">
+            <h3>Photos</h3>
+            <div class="photo-grid">
+                <div class="photo-placeholder">
+                    Photo 1: Under sink view
+                </div>
+                <div class="photo-placeholder">
+                    Photo 2: Water damage area
+                </div>
+            </div>
+        </div>
+        
+        <div class="quote-form" id="quote-form-section">
+            <h3>Submit Your Quote</h3>
+            <form id="quote-form">
+                <div class="form-group">
+                    <label for="cost">Estimated Cost ($)</label>
+                    <input type="number" id="cost" name="cost" step="0.01" min="0" required placeholder="Enter dollar amount">
+                </div>
+                
+                <div class="form-group">
+                    <label for="arrival-date">Estimated Arrival Date</label>
+                    <div class="datetime-group">
+                        <input type="date" id="arrival-date" name="arrival-date" required>
+                        <input type="time" id="arrival-time" name="arrival-time" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="work-description">Work Description</label>
+                    <textarea id="work-description" name="work-description" required placeholder="Describe the work you plan to perform..."></textarea>
+                </div>
+                
+                
+                <button type="submit" class="submit-btn">Submit Quote</button>
+            </form>
+            
+            <div class="success-message" id="success-message">
+                Your quote has been submitted successfully! The property manager will review it and get back to you soon.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Get request ID from URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const requestId = urlParams.get('id') || 'sample-request-123';
+        const isApproved = false;
+        
+        // Set default arrival date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('arrival-date').value = tomorrow.toISOString().split('T')[0];
+        
+        // Set default arrival time to 9 AM
+        document.getElementById('arrival-time').value = '09:00';
+        
+        // Handle form submission
+        document.getElementById('quote-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const quote = {
+                requestId: requestId,
+                cost: parseFloat(formData.get('cost')),
+                arrivalDate: formData.get('arrival-date'),
+                arrivalTime: formData.get('arrival-time'),
+                workDescription: formData.get('work-description'),
+                submittedAt: new Date().toISOString()
+            };
+            
+            // Simulate quote submission
+            console.log('Submitting quote:', quote);
+            
+            // Show success message
+            document.getElementById('quote-form').style.display = 'none';
+            document.getElementById('success-message').style.display = 'block';
+            
+            // Send the quote to the backend
+            fetch('/api/quotes', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(quote)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Quote submitted successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error submitting quote:', error);
+            });
+        });
+        
+        // Load request details from URL parameters or API
+        function loadRequestDetails() {
+            // In a real implementation, you would fetch this data from your backend
+            // using the requestId from the URL
+            
+            // For demo purposes, we're using static data
+            const sampleData = {
+                issueType: 'Kitchen Sink Leak',
+                location: 'Kitchen sink under cabinet',
+                severity: 'moderate',
+                address: '123 Main St, Apt 4B, City, State 12345',
+                tenantContact: 'John Doe - (555) 123-4567',
+                reportedTime: 'Today at 2:30 PM'
+            };
+            
+            // Populate the page with request details
+            document.getElementById('issue-type').textContent = sampleData.issueType;
+            document.getElementById('location').textContent = sampleData.location;
+            document.getElementById('severity').textContent = sampleData.severity.charAt(0).toUpperCase() + sampleData.severity.slice(1);
+            document.getElementById('address').textContent = sampleData.address;
+            document.getElementById('tenant-contact').textContent = sampleData.tenantContact;
+            document.getElementById('reported-time').textContent = sampleData.reportedTime;
+            
+            // Show tenant contact information only if quote is approved
+            if (isApproved) {
+                document.getElementById('tenant-contact-row').style.display = 'flex';
+                document.getElementById('quote-form-section').style.display = 'none';
+                document.getElementById('approved-section').style.display = 'block';
+                document.getElementById('header-title').textContent = '🎉 Quote Approved';
+                document.getElementById('header-subtitle').textContent = 'Your quote has been accepted! Contact the tenant to coordinate your visit.';
+            } else {
+                document.getElementById('tenant-contact-row').style.display = 'none';
+                document.getElementById('approved-section').style.display = 'none';
+            }
+            
+            // Set severity badge class
+            const severityElement = document.getElementById('severity');
+            severityElement.className = `severity-badge severity-${sampleData.severity}`;
+        }
+        
+        // Load request details when page loads
+        loadRequestDetails();
+    </script>
+</body>
+</html>

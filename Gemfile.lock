@@ -74,6 +74,9 @@ GEM
       minitest (>= 5.1)
       securerandom (>= 0.3)
       tzinfo (~> 2.0, >= 2.0.5)
+    anthropic (1.19.0)
+      cgi
+      connection_pool
     ast (2.4.3)
     base64 (0.3.0)
     bcrypt (3.1.21)
@@ -286,6 +289,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  anthropic
   bcrypt (~> 3.1.7)
   bootsnap
   brakeman
