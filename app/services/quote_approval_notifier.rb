@@ -24,6 +24,13 @@ class QuoteApprovalNotifier
            end
 
     SmsService.send_message(to: @vendor.phone_number, body: body)
+
+    PushNotificationService.notify(
+      user: @tenant,
+      title: "Quote Approved",
+      body: "Your #{@mr.issue_type} quote has been approved. Work will be scheduled soon.",
+      data: { maintenance_request_id: @mr.id.to_s, type: "quote_approved" }
+    )
   end
 
   private

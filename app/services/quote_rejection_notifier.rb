@@ -19,5 +19,12 @@ class QuoteRejectionNotifier
            "Best regards"
 
     SmsService.send_message(to: @vendor.phone_number, body: body)
+
+    PushNotificationService.notify(
+      user: @mr.tenant,
+      title: "Quote Update",
+      body: "A quote for your #{@mr.issue_type} request was declined. We're looking for other options.",
+      data: { maintenance_request_id: @mr.id.to_s, type: "quote_rejected" }
+    )
   end
 end

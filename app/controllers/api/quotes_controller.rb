@@ -27,6 +27,7 @@ class Api::QuotesController < Api::BaseController
     if quote.save
       request.update!(status: :quote_received)
       request.quote_requests.where(vendor_id: quote.vendor_id).update_all(status: QuoteRequest.statuses[:quoted])
+      QuoteCreatedNotifier.call(quote)
       render json: quote_json(quote), status: :created
     else
       render json: { errors: quote.errors.full_messages }, status: :unprocessable_entity

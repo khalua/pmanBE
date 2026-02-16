@@ -5,6 +5,7 @@ class User < ApplicationRecord
   has_many :maintenance_requests, foreign_key: :tenant_id, dependent: :destroy
   has_many :maintenance_request_notes, dependent: :destroy
   has_many :properties, foreign_key: :property_manager_id, dependent: :destroy
+  has_many :device_tokens, dependent: :destroy
   has_many :property_manager_vendors, dependent: :destroy
   has_many :vendors, through: :property_manager_vendors
 

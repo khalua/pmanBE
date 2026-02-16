@@ -16,7 +16,10 @@
       "Bash(git commit:*)",
       "Bash(bundle exec ruby:*)",
       "Bash(git stash:*)",
-      "Bash(xcodebuild:*)"
+      "Bash(xcodebuild:*)",
+      "Bash(python3:*)",
+      "Bash(qlmanage:*)",
+      "Bash(sips:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

@@ -79,6 +79,9 @@ Rails.application.routes.draw do
       end
     end
 
+    post "device_tokens", to: "device_tokens#create"
+    delete "device_tokens", to: "device_tokens#destroy"
+
     post "chat", to: "chat#chat"
     post "summarize", to: "chat#summarize"
 

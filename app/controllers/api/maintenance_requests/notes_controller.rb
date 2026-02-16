@@ -8,6 +8,7 @@ class Api::MaintenanceRequests::NotesController < Api::BaseController
   def create
     note = @maintenance_request.notes.build(content: params[:content], user: current_user)
     if note.save
+      NoteNotifier.call(note)
       render json: note_json(note), status: :created
     else
       render json: { errors: note.errors.full_messages }, status: :unprocessable_entity

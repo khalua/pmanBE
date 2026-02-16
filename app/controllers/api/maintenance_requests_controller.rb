@@ -28,7 +28,11 @@ class Api::MaintenanceRequestsController < Api::BaseController
   end
 
   def update
+    old_status = @maintenance_request.status
     if @maintenance_request.update(update_params)
+      if @maintenance_request.status != old_status
+        MaintenanceStatusNotifier.call(@maintenance_request, old_status)
+      end
       render json: request_json(@maintenance_request)
     else
       render json: { errors: @maintenance_request.errors.full_messages }, status: :unprocessable_entity
