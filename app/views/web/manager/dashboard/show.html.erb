@@ -54,7 +54,7 @@
                   <td class="px-4 py-2 text-sm text-gray-500"><%= unit.floor || "-" %></td>
                   <td class="px-4 py-2 text-sm text-gray-500">
                     <% if unit.tenant %>
-                      <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"><%= unit.tenant.name %></span>
+                      <%= link_to unit.tenant.name, web_manager_tenant_path(unit.tenant), class: "inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 hover:bg-green-200" %>
                     <% else %>
                       <span class="text-gray-400">Vacant</span>
                     <% end %>
@@ -96,7 +96,7 @@
             <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_manager_maintenance_request_path(req) %>'">
               <td class="px-4 py-3 text-sm text-gray-900"><%= req.issue_type %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.location %></td>
-              <td class="px-4 py-3 text-sm text-gray-500"><%= req.tenant.name %></td>
+              <td class="px-4 py-3 text-sm"><%= link_to req.tenant.name, web_manager_tenant_path(req.tenant), class: "text-blue-600 hover:text-blue-800", onclick: "event.stopPropagation()" %></td>
               <td class="px-4 py-3 text-sm text-gray-500">
                 <% if req.tenant.unit %>
                   <%= req.tenant.unit.property.name.presence || req.tenant.unit.property.address %> — Unit <%= req.tenant.unit.identifier %>

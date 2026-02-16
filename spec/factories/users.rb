@@ -4,6 +4,7 @@ FactoryBot.define do
     email { Faker::Internet.unique.email }
     password { "password123" }
     phone { Faker::PhoneNumber.phone_number }
+    mobile_phone { Faker::PhoneNumber.cell_phone }
     address { Faker::Address.full_address }
     role { :tenant }
 
