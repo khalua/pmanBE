@@ -34,7 +34,7 @@ class Api::AuthController < Api::BaseController
   private
 
   def register_params
-    params.permit(:email, :password, :name, :phone, :address, :role)
+    params.permit(:email, :password, :name, :phone, :mobile_phone, :address, :role)
   end
 
   def user_json(user)

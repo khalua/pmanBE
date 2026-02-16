@@ -62,6 +62,7 @@ Rails.application.routes.draw do
       member do
         post :assign_vendor
       end
+      resources :notes, only: [ :index, :create ], controller: "maintenance_requests/notes"
     end
 
     resources :vendors, only: [ :index, :show ]

@@ -89,6 +89,12 @@ class Api::ChatController < Api::BaseController
       )
 
       summary = response.content.first.text.strip
+
+      if params[:maintenance_request_id].present?
+        mr = MaintenanceRequest.find(params[:maintenance_request_id])
+        mr.update(chat_history: messages.map(&:to_unsafe_h))
+      end
+
       render json: { summary: summary }
     rescue => e
       Rails.logger.error("Summarize error: #{e.message}")

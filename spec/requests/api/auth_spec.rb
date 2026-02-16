@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe "Api::Auth", type: :request do
   describe "POST /api/register" do
     it "creates a user and returns a token" do
-      post "/api/register", params: { email: "test@example.com", password: "password123", name: "Test User" }
+      post "/api/register", params: { email: "test@example.com", password: "password123", name: "Test User", mobile_phone: "555-1234" }
       expect(response).to have_http_status(:created)
       body = JSON.parse(response.body)
       expect(body["token"]).to be_present
@@ -25,7 +25,7 @@ RSpec.describe "Api::Auth", type: :request do
   end
 
   describe "POST /api/login" do
-    let!(:user) { create(:user, email: "login@example.com", password: "password123") }
+    let!(:user) { create(:user, :property_manager, email: "login@example.com", password: "password123") }
 
     it "returns a token on valid credentials" do
       post "/api/login", params: { email: "login@example.com", password: "password123" }

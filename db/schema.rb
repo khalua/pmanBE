@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_16_062026) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_16_071204) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_062026) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "maintenance_request_notes", force: :cascade do |t|
+    t.bigint "maintenance_request_id", null: false
+    t.bigint "user_id", null: false
+    t.text "content", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["maintenance_request_id"], name: "index_maintenance_request_notes_on_maintenance_request_id"
+    t.index ["user_id"], name: "index_maintenance_request_notes_on_user_id"
+  end
+
   create_table "maintenance_requests", force: :cascade do |t|
     t.string "issue_type"
     t.string "location"
@@ -53,6 +63,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_062026) do
     t.bigint "assigned_vendor_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.jsonb "chat_history", default: []
     t.index ["assigned_vendor_id"], name: "index_maintenance_requests_on_assigned_vendor_id"
     t.index ["tenant_id"], name: "index_maintenance_requests_on_tenant_id"
   end
@@ -146,6 +157,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_062026) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "maintenance_request_notes", "maintenance_requests"
+  add_foreign_key "maintenance_request_notes", "users"
   add_foreign_key "maintenance_requests", "users", column: "tenant_id"
   add_foreign_key "maintenance_requests", "vendors", column: "assigned_vendor_id"
   add_foreign_key "properties", "users", column: "property_manager_id"

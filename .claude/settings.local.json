@@ -14,7 +14,8 @@
       "Bash(ls:*)",
       "Bash(ssh:*)",
       "Bash(git commit:*)",
-      "Bash(bundle exec ruby:*)"
+      "Bash(bundle exec ruby:*)",
+      "Bash(git stash:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"
