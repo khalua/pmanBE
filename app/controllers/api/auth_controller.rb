@@ -14,6 +14,12 @@ class Api::AuthController < Api::BaseController
   def login
     user = User.find_by(email: params[:email]&.downcase)
     if user&.authenticate(params[:password])
+      if user.tenant? && user.unit.nil?
+        UserMailer.unassigned_tenant_login(user).deliver_later
+        render json: { error: "Your account is not yet assigned to a property. Your property manager has been notified." }, status: :forbidden
+        return
+      end
+
       token = JwtService.encode(user_id: user.id)
       render json: { token: token, user: user_json(user) }
     else
