@@ -175,6 +175,33 @@
     </div>
   <% end %>
 
+  <%# Notes %>
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Notes & Updates</h2>
+    <% if @maintenance_request.notes.any? %>
+      <div class="space-y-3 mb-4">
+        <% @maintenance_request.notes.order(created_at: :asc).each do |note| %>
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex justify-between items-start">
+              <div class="flex items-center gap-2">
+                <span class="text-sm font-medium text-gray-900"><%= note.user.name %></span>
+                <% if note.user.tenant? %>
+                  <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Tenant</span>
+                <% elsif note.user.property_manager? %>
+                  <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Manager</span>
+                <% end %>
+              </div>
+              <span class="text-xs text-gray-500"><%= note.created_at.strftime("%b %d, %Y %l:%M %p") %></span>
+            </div>
+            <p class="mt-2 text-sm text-gray-700"><%= note.content %></p>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-400">No notes yet.</p>
+    <% end %>
+  </div>
+
   <%# Send quote requests form %>
   <% already_requested_ids = @maintenance_request.quote_requests.pluck(:vendor_id) %>
   <% requestable_vendors = @vendors.where.not(id: already_requested_ids) %>

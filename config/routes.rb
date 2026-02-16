@@ -22,6 +22,11 @@ Rails.application.routes.draw do
     namespace :tenant do
       get "dashboard", to: "dashboard#show"
       resource :profile, only: [ :edit, :update ]
+      resources :maintenance_requests, only: [ :show ] do
+        member do
+          post :create_note
+        end
+      end
     end
     namespace :manager do
       get "dashboard", to: "dashboard#show"

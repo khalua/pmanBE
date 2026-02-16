@@ -45,8 +45,8 @@
         </thead>
         <tbody class="divide-y divide-gray-200">
           <% @maintenance_requests.each do |req| %>
-            <tr>
-              <td class="px-4 py-3 text-sm text-gray-900"><%= req.issue_type %></td>
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_tenant_maintenance_request_path(req) %>'">
+              <td class="px-4 py-3 text-sm text-blue-600 hover:text-blue-800 font-medium"><%= req.issue_type %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.location %></td>
               <td class="px-4 py-3">
                 <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
