@@ -2,7 +2,7 @@ class QuoteRequest < ApplicationRecord
   belongs_to :maintenance_request
   belongs_to :vendor
 
-  enum :status, { pending: 0, sent: 1, quoted: 2, declined: 3 }
+  enum :status, { pending: 0, sent: 1, quoted: 2, declined: 3, rejected: 4 }
 
   validates :vendor_id, uniqueness: { scope: :maintenance_request_id }
 

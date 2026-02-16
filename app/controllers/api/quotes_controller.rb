@@ -41,7 +41,19 @@ class Api::QuotesController < Api::BaseController
 
   def reject
     quote = Quote.find(params[:id])
-    quote.maintenance_request.update!(status: :quote_rejected)
+
+    ActiveRecord::Base.transaction do
+      quote.maintenance_request.update!(status: :quote_rejected)
+
+      if quote.vendor_id.present?
+        quote.maintenance_request.quote_requests
+          .where(vendor_id: quote.vendor_id)
+          .update_all(status: QuoteRequest.statuses[:rejected])
+      end
+    end
+
+    QuoteRejectionNotifier.call(quote)
+
     render json: { message: "Quote rejected", quote: quote_json(quote) }
   end
 

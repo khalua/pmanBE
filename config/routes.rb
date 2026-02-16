@@ -31,6 +31,8 @@ Rails.application.routes.draw do
       resources :quotes, only: [] do
         member do
           post :approve
+          get :select_message
+          post :send_approval_message
           post :reject
         end
       end
