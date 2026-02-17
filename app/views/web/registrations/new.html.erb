@@ -1,24 +1,34 @@
-<% content_for(:title) { "Register - Prompt" } %>
+<% content_for(:title) { "Accept Invitation - Prompt" } %>
 
 <div class="min-h-[80vh] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
   <div class="max-w-md w-full space-y-8">
     <div class="text-center">
-      <h2 class="text-3xl font-bold text-gray-900">Create your account</h2>
+      <h2 class="text-3xl font-bold text-gray-900">Welcome to Prompt!</h2>
       <p class="mt-2 text-sm text-gray-600">
-        Already have an account? <%= link_to "Log in", login_path, class: "text-indigo-600 hover:text-indigo-500" %>
+        You've been invited to join <strong><%= @invitation.unit.property.name.presence || @invitation.unit.property.address %></strong> — Unit <strong><%= @invitation.unit.identifier %></strong>.
       </p>
+      <p class="mt-1 text-sm text-gray-600">Set up your password to get started.</p>
     </div>
 
     <%= form_with url: register_path, method: :post, class: "mt-8 space-y-6" do |f| %>
+      <input type="hidden" name="invite_code" value="<%= @invitation.code %>">
+
       <div class="space-y-4">
         <div>
           <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_field :name, required: true, autofocus: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
+          <%= f.text_field :name, value: @invitation.tenant_name, required: true, autofocus: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
         </div>
+
         <div>
           <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
-          <%= f.email_field :email, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
+          <input type="email" value="<%= @invitation.tenant_email %>" disabled class="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm px-3 py-2 border text-gray-500 cursor-not-allowed">
         </div>
+
+        <div>
+          <%= f.label :mobile_phone, "Mobile phone", class: "block text-sm font-medium text-gray-700" %>
+          <%= f.telephone_field :mobile_phone, required: true, placeholder: "+1 (555) 123-4567", class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
+        </div>
+
         <div>
           <%= f.label :password, class: "block text-sm font-medium text-gray-700" %>
           <%= f.password_field :password, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
@@ -27,28 +37,13 @@
           <%= f.label :password_confirmation, "Confirm password", class: "block text-sm font-medium text-gray-700" %>
           <%= f.password_field :password_confirmation, required: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
         </div>
-        <div>
-          <%= f.label :role, class: "block text-sm font-medium text-gray-700" %>
-          <%= f.select :role, [["Tenant", "tenant"], ["Property Manager", "property_manager"]], {}, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
-        </div>
       </div>
 
-      <%= f.submit "Create account", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
+      <%= f.submit "Create account & accept invitation", class: "w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 cursor-pointer" %>
     <% end %>
 
-    <div class="mt-6">
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-300"></div></div>
-        <div class="relative flex justify-center text-sm"><span class="px-2 bg-gray-50 text-gray-500">Or sign up with</span></div>
-      </div>
-      <div class="mt-6">
-        <%= button_to "/auth/google_oauth2", method: :post, data: { turbo: false }, class: "w-full flex items-center rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer border border-gray-300 overflow-hidden" do %>
-          <span class="flex items-center justify-center bg-white px-3 py-2.5 border-r border-gray-300">
-            <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59a14.5 14.5 0 0 1 0-9.18l-7.98-6.19a24.0 24.0 0 0 0 0 21.56l7.98-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
-          </span>
-          <span class="flex-1 text-center py-2.5">Sign up with Google</span>
-        <% end %>
-      </div>
-    </div>
+    <p class="text-center text-sm text-gray-500">
+      Already have an account? <%= link_to "Log in", login_path, class: "text-indigo-600 hover:text-indigo-500" %>
+    </p>
   </div>
 </div>

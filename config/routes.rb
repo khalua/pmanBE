@@ -19,6 +19,7 @@ Rails.application.routes.draw do
   patch "reset_password", to: "web/password_resets#update"
 
   namespace :web do
+    resource :preferences, only: [ :show, :update ], controller: "preferences"
     namespace :tenant do
       get "dashboard", to: "dashboard#show"
       resource :profile, only: [ :edit, :update ]
@@ -30,8 +31,20 @@ Rails.application.routes.draw do
     end
     namespace :manager do
       get "dashboard", to: "dashboard#show"
-      resources :tenants, only: [ :show ]
+      resources :tenants, only: [ :index, :show ] do
+        member do
+          post :move_out
+          post :activate
+        end
+      end
       resources :vendors, only: [ :index, :create, :destroy ]
+      resources :properties, only: [] do
+        resources :invitations, only: [ :index, :create ] do
+          member do
+            post :revoke
+          end
+        end
+      end
       resources :maintenance_requests, only: [ :show ] do
         resources :quote_requests, only: [ :create ]
         member do
@@ -91,10 +104,26 @@ Rails.application.routes.draw do
 
     post "reset", to: "reset#create"
 
+    post "phone/verify/send", to: "phone_verifications#send_code"
+    post "phone/verify/confirm", to: "phone_verifications#confirm"
+
     namespace :manager do
       resources :vendors, only: [ :index, :show, :create, :destroy ]
       resources :maintenance_requests, only: [] do
         resources :quote_requests, only: [ :index, :create ]
+      end
+      resources :properties, only: [] do
+        resources :invitations, only: [ :index ]
+        resources :units, only: [] do
+          resources :invitations, only: [ :create ]
+        end
+      end
+      resources :invitations, only: [ :destroy ]
+      resources :tenants, only: [ :show, :update ] do
+        member do
+          post :move_out
+          post :activate
+        end
       end
     end
 

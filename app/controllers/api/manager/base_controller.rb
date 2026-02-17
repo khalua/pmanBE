@@ -4,6 +4,6 @@ class Api::Manager::BaseController < Api::BaseController
   private
 
   def require_property_manager!
-    render json: { error: "Forbidden" }, status: :forbidden unless current_user&.property_manager?
+    render json: { error: "Forbidden" }, status: :forbidden unless current_user&.property_manager? || current_user&.super_admin?
   end
 end

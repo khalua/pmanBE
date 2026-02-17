@@ -5,14 +5,11 @@ class UserMailer < ApplicationMailer
     mail(to: user.email, subject: "Reset your Prompt password")
   end
 
-  def unassigned_tenant_login(tenant)
-    @tenant = tenant
-    admin_emails = User.super_admin.pluck(:email)
-    return if admin_emails.empty?
-
-    mail(
-      to: admin_emails,
-      subject: "Alert: Unassigned tenant attempted login - #{tenant.name}"
-    )
+  def tenant_invitation(invitation)
+    @invitation = invitation
+    @register_url = register_url(invite_code: invitation.code)
+    @property = invitation.unit.property
+    @manager = invitation.created_by
+    mail(to: invitation.tenant_email, subject: "You've been invited to join #{@property.name.presence || @property.address} on Prompt")
   end
 end

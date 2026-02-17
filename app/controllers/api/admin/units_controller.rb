@@ -41,8 +41,6 @@ class Api::Admin::UnitsController < Api::Admin::BaseController
   end
 
   def assign_tenant(tenant_id)
-    User.where(unit_id: @unit.id).update_all(unit_id: nil)
-
     if tenant_id.present?
       user = User.tenant.find(tenant_id)
       user.update!(unit_id: @unit.id)
@@ -55,7 +53,7 @@ class Api::Admin::UnitsController < Api::Admin::BaseController
       id: unit.id,
       identifier: unit.identifier,
       floor: unit.floor,
-      tenant: unit.tenant ? { id: unit.tenant.id, name: unit.tenant.name, email: unit.tenant.email } : nil
+      tenants: unit.tenants.map { |t| { id: t.id, name: t.name, email: t.email } }
     }
   end
 end

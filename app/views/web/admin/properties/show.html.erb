@@ -46,8 +46,10 @@
               <td class="px-4 py-3 text-sm font-medium text-gray-900"><%= unit.identifier %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= unit.floor || "-" %></td>
               <td class="px-4 py-3 text-sm text-gray-500">
-                <% if unit.tenant %>
-                  <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800"><%= unit.tenant.name %></span>
+                <% if unit.tenants.any? %>
+                  <% unit.tenants.each do |tenant| %>
+                    <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 mr-1"><%= tenant.name %></span>
+                  <% end %>
                 <% else %>
                   <span class="text-gray-400">Vacant</span>
                 <% end %>

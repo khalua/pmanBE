@@ -22,7 +22,8 @@
       "Bash(sips:*)",
       "Bash(afplay:*)",
       "WebSearch",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(bundle exec rails runner:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

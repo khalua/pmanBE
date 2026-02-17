@@ -28,6 +28,26 @@ RSpec.describe "Web::Manager::Tenants", type: :request do
       expect(response.body).to include(mr.issue_type)
     end
 
+    it "shows active/inactive status" do
+      log_in(manager)
+      get web_manager_tenant_path(tenant_user)
+      expect(response.body).to include("Active")
+    end
+
+    it "shows move-out button for active tenants" do
+      log_in(manager)
+      get web_manager_tenant_path(tenant_user)
+      expect(response.body).to include("Move Out")
+    end
+
+    it "shows reactivate button for inactive tenants" do
+      tenant_user.update!(active: false)
+      log_in(manager)
+      get web_manager_tenant_path(tenant_user)
+      expect(response.body).to include("Reactivate")
+      expect(response.body).to include("Inactive")
+    end
+
     it "redirects unauthenticated users" do
       get web_manager_tenant_path(tenant_user)
       expect(response).to redirect_to(login_path)
@@ -45,6 +65,31 @@ RSpec.describe "Web::Manager::Tenants", type: :request do
       get web_manager_tenant_path(other_tenant)
 
       expect(response).to redirect_to(web_manager_dashboard_path)
+    end
+  end
+
+  describe "POST /web/manager/tenants/:id/move_out" do
+    it "deactivates the tenant and sets move-out date" do
+      log_in(manager)
+
+      post move_out_web_manager_tenant_path(tenant_user)
+
+      expect(response).to redirect_to(web_manager_tenant_path(tenant_user))
+      tenant_user.reload
+      expect(tenant_user.active).to be false
+      expect(tenant_user.move_out_date).to eq(Date.current)
+    end
+  end
+
+  describe "POST /web/manager/tenants/:id/activate" do
+    it "reactivates the tenant" do
+      tenant_user.update!(active: false, move_out_date: Date.current)
+      log_in(manager)
+
+      post activate_web_manager_tenant_path(tenant_user)
+
+      expect(response).to redirect_to(web_manager_tenant_path(tenant_user))
+      expect(tenant_user.reload.active).to be true
     end
   end
 end

@@ -5,6 +5,11 @@ class Web::PasswordResetsController < WebController
   def create
     user = User.find_by("LOWER(email) = ?", params[:email]&.downcase)
 
+    if user&.google_auth_enabled? && user&.provider.present?
+      redirect_to login_path, notice: "That account uses Google login. Click \"Continue with Google\" to sign in."
+      return
+    end
+
     if user
       token = SecureRandom.urlsafe_base64(32)
       user.update!(password_reset_token: token, password_reset_sent_at: Time.current)

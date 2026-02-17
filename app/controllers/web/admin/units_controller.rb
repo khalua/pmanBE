@@ -18,16 +18,12 @@ class Web::Admin::UnitsController < WebController
   end
 
   def edit
-    @tenants = User.tenant.where(unit_id: nil).or(User.tenant.where(unit_id: @unit.id)).order(:name)
   end
 
   def update
-    assign_tenant(params[:unit][:tenant_id]) if params[:unit][:tenant_id].present?
-
     if @unit.update(unit_params)
       redirect_to web_admin_property_path(@property), notice: "Unit updated."
     else
-      @tenants = User.tenant.where(unit_id: nil).or(User.tenant.where(unit_id: @unit.id)).order(:name)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -49,15 +45,6 @@ class Web::Admin::UnitsController < WebController
 
   def unit_params
     params.require(:unit).permit(:identifier, :floor)
-  end
-
-  def assign_tenant(tenant_id)
-    User.where(unit_id: @unit.id).update_all(unit_id: nil)
-
-    if tenant_id.present? && tenant_id != ""
-      user = User.tenant.find(tenant_id)
-      user.update!(unit_id: @unit.id)
-    end
   end
 
   def require_super_admin!

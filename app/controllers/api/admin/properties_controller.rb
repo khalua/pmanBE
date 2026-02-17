@@ -53,7 +53,7 @@ class Api::Admin::PropertiesController < Api::Admin::BaseController
       created_at: property.created_at
     }
     if include_units
-      json[:units] = property.units.includes(:tenant).map { |u| unit_json(u) }
+      json[:units] = property.units.includes(:tenants).map { |u| unit_json(u) }
     end
     json
   end
@@ -63,7 +63,7 @@ class Api::Admin::PropertiesController < Api::Admin::BaseController
       id: unit.id,
       identifier: unit.identifier,
       floor: unit.floor,
-      tenant: unit.tenant ? { id: unit.tenant.id, name: unit.tenant.name, email: unit.tenant.email } : nil
+      tenants: unit.tenants.map { |t| { id: t.id, name: t.name, email: t.email } }
     }
   end
 end

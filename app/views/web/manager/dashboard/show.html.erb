@@ -35,9 +35,12 @@
               <h3 class="text-md font-semibold text-gray-900"><%= property.name.presence || property.address %></h3>
               <p class="text-sm text-gray-500"><%= property.address %></p>
             </div>
-            <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= property.house? ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' %>">
-              <%= property.property_type.humanize %>
-            </span>
+            <div class="flex items-center gap-3">
+              <%= link_to "Invitations", web_manager_property_invitations_path(property), class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= property.house? ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' %>">
+                <%= property.property_type.humanize %>
+              </span>
+            </div>
           </div>
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
@@ -53,8 +56,10 @@
                   <td class="px-4 py-2 text-sm font-medium text-gray-900"><%= unit.identifier %></td>
                   <td class="px-4 py-2 text-sm text-gray-500"><%= unit.floor || "-" %></td>
                   <td class="px-4 py-2 text-sm text-gray-500">
-                    <% if unit.tenant %>
-                      <%= link_to unit.tenant.name, web_manager_tenant_path(unit.tenant), class: "inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 hover:bg-green-200" %>
+                    <% if unit.tenants.any? %>
+                      <% unit.tenants.each do |tenant| %>
+                        <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 hover:bg-green-200 mr-1" %>
+                      <% end %>
                     <% else %>
                       <span class="text-gray-400">Vacant</span>
                     <% end %>

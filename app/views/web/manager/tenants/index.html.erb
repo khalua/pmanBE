@@ -1,0 +1,48 @@
+<% content_for(:title) { "Tenants - Prompt" } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Tenants</h1>
+    <%= link_to "Back to Dashboard", web_manager_dashboard_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+  </div>
+
+  <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Property</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Unit</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Move-in</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @tenants.each do |tenant| %>
+          <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_manager_tenant_path(tenant) %>'">
+            <td class="px-4 py-3 text-sm font-medium text-gray-900"><%= tenant.name %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.email %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.mobile_phone.presence || "-" %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.unit.property.name.presence || tenant.unit.property.address %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.unit.identifier %></td>
+            <td class="px-4 py-3">
+              <% if tenant.active? %>
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+              <% else %>
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Inactive</span>
+              <% end %>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.move_in_date&.strftime("%b %d, %Y") || "-" %></td>
+          </tr>
+        <% end %>
+        <% if @tenants.empty? %>
+          <tr>
+            <td colspan="7" class="px-4 py-6 text-sm text-gray-400 text-center">No tenants yet. Create invitations to onboard tenants.</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

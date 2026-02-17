@@ -7,7 +7,8 @@ RSpec.describe Unit, type: :model do
 
   describe "associations" do
     it { is_expected.to belong_to(:property) }
-    it { is_expected.to have_one(:tenant).class_name("User").dependent(:nullify) }
+    it { is_expected.to have_many(:tenants).class_name("User").dependent(:nullify) }
+    it { is_expected.to have_many(:tenant_invitations).dependent(:destroy) }
   end
 
   it "nullifies tenant unit_id on destroy" do

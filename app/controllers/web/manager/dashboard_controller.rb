@@ -3,9 +3,9 @@ class Web::Manager::DashboardController < WebController
   before_action :require_property_manager!
 
   def show
-    @properties = current_user.properties.includes(units: :tenant).order(:address)
+    @properties = current_user.properties.includes(units: :tenants).order(:address)
     @total_units = @properties.sum { |p| p.units.size }
-    @occupied_units = @properties.sum { |p| p.units.count { |u| u.tenant.present? } }
+    @occupied_units = @properties.sum { |p| p.units.count { |u| u.tenants.any? } }
     @maintenance_requests = MaintenanceRequest
       .joins(tenant: :unit)
       .where(units: { property_id: @properties.select(:id) })

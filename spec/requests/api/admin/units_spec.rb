@@ -40,16 +40,7 @@ RSpec.describe "Api::Admin::Units", type: :request do
       expect(response).to have_http_status(:ok)
       expect(tenant.reload.unit_id).to eq(unit.id)
       body = JSON.parse(response.body)
-      expect(body["tenant"]["id"]).to eq(tenant.id)
-    end
-
-    it "removes a tenant from a unit" do
-      tenant = create(:user, unit: unit)
-      patch "/api/admin/properties/#{property.id}/units/#{unit.id}", headers: auth_headers(admin), params: {
-        unit: { tenant_id: "" }
-      }
-      expect(response).to have_http_status(:ok)
-      expect(tenant.reload.unit_id).to be_nil
+      expect(body["tenants"].map { |t| t["id"] }).to include(tenant.id)
     end
   end
 

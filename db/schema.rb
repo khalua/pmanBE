@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_16_210024) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_17_222329) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -78,6 +78,17 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_210024) do
     t.index ["tenant_id"], name: "index_maintenance_requests_on_tenant_id"
   end
 
+  create_table "phone_verifications", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.string "phone_number"
+    t.string "code"
+    t.datetime "verified_at"
+    t.datetime "expires_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_phone_verifications_on_user_id"
+  end
+
   create_table "properties", force: :cascade do |t|
     t.string "address", null: false
     t.string "name"
@@ -123,6 +134,23 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_210024) do
     t.index ["vendor_id"], name: "index_quotes_on_vendor_id"
   end
 
+  create_table "tenant_invitations", force: :cascade do |t|
+    t.bigint "unit_id", null: false
+    t.bigint "created_by_id", null: false
+    t.string "code", null: false
+    t.string "tenant_name", null: false
+    t.string "tenant_email", null: false
+    t.bigint "claimed_by_id"
+    t.datetime "expires_at", null: false
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["claimed_by_id"], name: "index_tenant_invitations_on_claimed_by_id"
+    t.index ["code"], name: "index_tenant_invitations_on_code", unique: true
+    t.index ["created_by_id"], name: "index_tenant_invitations_on_created_by_id"
+    t.index ["unit_id"], name: "index_tenant_invitations_on_unit_id"
+  end
+
   create_table "units", force: :cascade do |t|
     t.bigint "property_id", null: false
     t.string "identifier"
@@ -148,6 +176,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_210024) do
     t.bigint "unit_id"
     t.string "mobile_phone"
     t.string "home_phone"
+    t.boolean "phone_verified", default: false, null: false
+    t.date "move_in_date"
+    t.date "move_out_date"
+    t.boolean "active", default: true, null: false
+    t.boolean "google_auth_enabled", default: false, null: false
     t.index ["email"], name: "index_users_on_email", unique: true
     t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
     t.index ["unit_id"], name: "index_users_on_unit_id"
@@ -172,6 +205,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_210024) do
   add_foreign_key "maintenance_request_notes", "users"
   add_foreign_key "maintenance_requests", "users", column: "tenant_id"
   add_foreign_key "maintenance_requests", "vendors", column: "assigned_vendor_id"
+  add_foreign_key "phone_verifications", "users"
   add_foreign_key "properties", "users", column: "property_manager_id"
   add_foreign_key "property_manager_vendors", "users"
   add_foreign_key "property_manager_vendors", "vendors"
@@ -179,6 +213,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_16_210024) do
   add_foreign_key "quote_requests", "vendors"
   add_foreign_key "quotes", "maintenance_requests"
   add_foreign_key "quotes", "vendors"
+  add_foreign_key "tenant_invitations", "units"
+  add_foreign_key "tenant_invitations", "users", column: "claimed_by_id"
+  add_foreign_key "tenant_invitations", "users", column: "created_by_id"
   add_foreign_key "units", "properties"
   add_foreign_key "users", "units"
 end

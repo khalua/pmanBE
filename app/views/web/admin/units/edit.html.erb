@@ -29,13 +29,16 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-gray-700">Assign Tenant</label>
-        <select name="unit[tenant_id]" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-          <option value="">Vacant (no tenant)</option>
-          <% @tenants.each do |tenant| %>
-            <option value="<%= tenant.id %>" <%= "selected" if @unit.tenant == tenant %>><%= tenant.name %> (<%= tenant.email %>)</option>
-          <% end %>
-        </select>
+        <label class="block text-sm font-medium text-gray-700">Current Tenants</label>
+        <% if @unit.tenants.any? %>
+          <ul class="mt-1 space-y-1">
+            <% @unit.tenants.each do |tenant| %>
+              <li class="text-sm text-gray-700"><%= tenant.name %> (<%= tenant.email %>)</li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="mt-1 text-sm text-gray-400">No tenants assigned. Use invitation codes to onboard tenants.</p>
+        <% end %>
       </div>
 
       <div>
