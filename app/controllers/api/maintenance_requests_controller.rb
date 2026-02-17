@@ -18,8 +18,11 @@ class Api::MaintenanceRequestsController < Api::BaseController
 
   def create
     raw_severity = params[:severity]
-    request = current_user.maintenance_requests.build(request_params.except(:severity))
+    request = current_user.maintenance_requests.build(request_params.except(:severity, :chat_history))
     request.severity = normalize_severity(raw_severity)
+    if params[:chat_history].present?
+      request.chat_history = params[:chat_history].is_a?(String) ? JSON.parse(params[:chat_history]) : params[:chat_history]
+    end
     if request.save
       render json: request_json(request), status: :created
     else
