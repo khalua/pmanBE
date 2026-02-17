@@ -24,6 +24,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
       request.chat_history = params[:chat_history].is_a?(String) ? JSON.parse(params[:chat_history]) : params[:chat_history]
     end
     if request.save
+      MaintenanceRequestCreatedNotifier.call(request)
       render json: request_json(request), status: :created
     else
       render json: { errors: request.errors.full_messages }, status: :unprocessable_entity

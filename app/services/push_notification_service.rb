@@ -26,7 +26,7 @@ class PushNotificationService
       Rails.logger.info("[PushNotificationService] Sent to #{token[0..8]}...: #{response[:status_code]}")
 
       # Clean up invalid tokens
-      if [ 404, 400 ].include?(response[:status_code])
+      if [ 404, 400, 401 ].include?(response[:status_code])
         DeviceToken.where(token: token).destroy_all
       end
     rescue => e
