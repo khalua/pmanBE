@@ -34,6 +34,9 @@ Rails.application.routes.draw do
       resources :vendors, only: [ :index, :create, :destroy ]
       resources :maintenance_requests, only: [ :show ] do
         resources :quote_requests, only: [ :create ]
+        member do
+          post :create_note
+        end
       end
       resources :quotes, only: [] do
         member do

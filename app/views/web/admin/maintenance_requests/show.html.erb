@@ -11,6 +11,53 @@
     </div>
   </div>
 
+  <%# Progress Stepper %>
+  <% steps = [
+    { key: "submitted", label: "New Request" },
+    { key: "vendor_quote_requested", label: "Quote Requested" },
+    { key: "quote_received", label: "Quote Received" },
+    { key: "quote_accepted", label: "Quote Accepted" }
+  ]
+  current_index = case @maintenance_request.status
+    when "submitted" then 0
+    when "vendor_quote_requested" then 1
+    when "quote_received" then 2
+    when "quote_accepted", "in_progress", "completed" then 3
+    when "quote_rejected" then 1
+    else 0
+    end
+  %>
+  <div class="mt-4 bg-white rounded-lg shadow p-6">
+    <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Process Status</p>
+    <div class="flex items-center">
+      <% steps.each_with_index do |step, i| %>
+        <div class="flex items-center <%= 'flex-1' unless i == steps.length - 1 %>">
+          <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+            <%= current_index >= i ? 'bg-blue-600' : 'bg-gray-300' %>">
+            <% if current_index > i %>
+              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            <% elsif current_index == i %>
+              <div class="w-2 h-2 rounded-full bg-white"></div>
+            <% end %>
+          </div>
+          <% unless i == steps.length - 1 %>
+            <div class="flex-1 h-1 mx-2 <%= current_index > i ? 'bg-blue-600' : 'bg-gray-300' %>"></div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+    <div class="flex mt-2">
+      <% steps.each_with_index do |step, i| %>
+        <div class="<%= i == steps.length - 1 ? 'text-right' : (i == 0 ? 'text-left' : 'text-center') %> flex-1">
+          <span class="text-xs <%= current_index >= i ? 'text-gray-700' : 'text-gray-400' %>"><%= step[:label] %></span>
+        </div>
+      <% end %>
+    </div>
+    <% if @maintenance_request.quote_rejected? %>
+      <p class="mt-3 text-xs font-medium text-orange-600">Quote rejected — select a different vendor</p>
+    <% end %>
+  </div>
+
   <div class="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4">
     <div class="bg-white rounded-lg shadow p-4">
       <p class="text-sm font-medium text-gray-500">Status</p>
@@ -110,11 +157,12 @@
     </div>
   <% end %>
 
-  <% if @maintenance_request.chat_history.present? %>
+  <% filtered_chat = @maintenance_request.chat_history.reject { |m| m['role'] == 'system' || m['content']&.match?(/\AREADY_FOR_(PHOTOS|SUBMISSION)\z/) } %>
+  <% if filtered_chat.present? %>
     <div class="mt-6 bg-white rounded-lg shadow p-6">
       <h2 class="text-lg font-semibold text-gray-900">Chat Transcript</h2>
       <div class="mt-4 space-y-4">
-        <% @maintenance_request.chat_history.each do |message| %>
+        <% filtered_chat.each do |message| %>
           <div class="flex items-start gap-3">
             <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center <%= message['role'] == 'user' ? 'bg-blue-100 text-blue-600' : 'bg-green-100 text-green-600' %>">
               <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">

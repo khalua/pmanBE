@@ -10,7 +10,8 @@ class Web::Tenant::MaintenanceRequestsController < WebController
 
   def create_note
     @maintenance_request = current_user.maintenance_requests.find(params[:id])
-    @maintenance_request.notes.create!(content: params[:content], user: current_user)
+    note = @maintenance_request.notes.create!(content: params[:content], user: current_user)
+    NoteNotifier.call(note)
     redirect_to web_tenant_maintenance_request_path(@maintenance_request), notice: "Note added."
   end
 
