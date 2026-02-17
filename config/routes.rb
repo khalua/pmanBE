@@ -50,6 +50,7 @@ Rails.application.routes.draw do
       resources :properties, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
         resources :units, only: [ :new, :create, :edit, :update, :destroy ]
       end
+      resources :maintenance_requests, only: [ :index, :show, :destroy ]
     end
   end
 
@@ -97,7 +98,7 @@ Rails.application.routes.draw do
     namespace :admin do
       get "dashboard", to: "dashboard#show"
       resources :users, only: [ :index, :destroy ]
-      resources :maintenance_requests, only: [ :index ]
+      resources :maintenance_requests, only: [ :index, :show, :destroy ]
       resources :properties, only: [ :index, :show, :create, :update, :destroy ] do
         resources :units, only: [ :create, :update, :destroy ]
       end

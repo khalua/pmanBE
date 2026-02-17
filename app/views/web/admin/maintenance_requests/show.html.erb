@@ -1,0 +1,170 @@
+<% content_for(:title) { "Request ##{@maintenance_request.id} - Prompt" } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900"><%= @maintenance_request.issue_type %></h1>
+    <div class="flex gap-3">
+      <%= link_to "Back", web_admin_maintenance_requests_path, class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+      <%= button_to "Delete", web_admin_maintenance_request_path(@maintenance_request), method: :delete,
+            data: { turbo_confirm: "Delete this maintenance request? This cannot be undone." },
+            class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700" %>
+    </div>
+  </div>
+
+  <div class="mt-4 grid grid-cols-1 sm:grid-cols-4 gap-4">
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Status</p>
+      <p class="mt-1">
+        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+          <%= case @maintenance_request.status
+              when 'submitted' then 'bg-yellow-100 text-yellow-800'
+              when 'completed' then 'bg-green-100 text-green-800'
+              when 'in_progress' then 'bg-blue-100 text-blue-800'
+              else 'bg-gray-100 text-gray-800'
+              end %>">
+          <%= @maintenance_request.status.humanize %>
+        </span>
+      </p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Severity</p>
+      <p class="mt-1">
+        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full
+          <%= case @maintenance_request.severity
+              when 'low' then 'bg-green-100 text-green-800'
+              when 'medium' then 'bg-yellow-100 text-yellow-800'
+              when 'high' then 'bg-orange-100 text-orange-800'
+              when 'urgent' then 'bg-red-100 text-red-800'
+              else 'bg-gray-100 text-gray-800'
+              end %>">
+          <%= @maintenance_request.severity&.humanize || "N/A" %>
+        </span>
+      </p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Location</p>
+      <p class="mt-1 text-lg font-semibold text-gray-900"><%= @maintenance_request.location || "N/A" %></p>
+    </div>
+    <div class="bg-white rounded-lg shadow p-4">
+      <p class="text-sm font-medium text-gray-500">Created</p>
+      <p class="mt-1 text-lg font-semibold text-gray-900"><%= @maintenance_request.created_at.strftime("%b %d, %Y") %></p>
+    </div>
+  </div>
+
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900">Tenant</h2>
+      <dl class="mt-3 space-y-2">
+        <div>
+          <dt class="text-sm text-gray-500">Name</dt>
+          <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm text-gray-500">Email</dt>
+          <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.email %></dd>
+        </div>
+        <% if @maintenance_request.tenant.phone.present? %>
+          <div>
+            <dt class="text-sm text-gray-500">Phone</dt>
+            <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.phone %></dd>
+          </div>
+        <% end %>
+        <% if @maintenance_request.tenant.unit %>
+          <div>
+            <dt class="text-sm text-gray-500">Unit</dt>
+            <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.unit.identifier %> - <%= @maintenance_request.tenant.unit.property.name || @maintenance_request.tenant.unit.property.address %></dd>
+          </div>
+        <% end %>
+      </dl>
+    </div>
+
+    <% if @maintenance_request.assigned_vendor %>
+      <div class="bg-white rounded-lg shadow p-6">
+        <h2 class="text-lg font-semibold text-gray-900">Assigned Vendor</h2>
+        <dl class="mt-3 space-y-2">
+          <div>
+            <dt class="text-sm text-gray-500">Name</dt>
+            <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.assigned_vendor.name %></dd>
+          </div>
+          <% if @maintenance_request.assigned_vendor.phone_number.present? %>
+            <div>
+              <dt class="text-sm text-gray-500">Phone</dt>
+              <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.assigned_vendor.phone_number %></dd>
+            </div>
+          <% end %>
+          <% if @maintenance_request.assigned_vendor.vendor_type.present? %>
+            <div>
+              <dt class="text-sm text-gray-500">Type</dt>
+              <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.assigned_vendor.vendor_type %></dd>
+            </div>
+          <% end %>
+        </dl>
+      </div>
+    <% end %>
+  </div>
+
+  <% if @maintenance_request.conversation_summary.present? %>
+    <div class="mt-6 bg-white rounded-lg shadow p-6">
+      <h2 class="text-lg font-semibold text-gray-900">Summary</h2>
+      <p class="mt-2 text-sm text-gray-700 whitespace-pre-wrap"><%= @maintenance_request.conversation_summary %></p>
+    </div>
+  <% end %>
+
+  <% if @quotes.any? %>
+    <div class="mt-6">
+      <h2 class="text-lg font-semibold text-gray-900">Quotes</h2>
+      <div class="mt-4 bg-white shadow rounded-lg overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cost</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+              <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ETA</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200">
+            <% @quotes.each do |quote| %>
+              <tr>
+                <td class="px-4 py-3 text-sm text-gray-900"><%= quote.vendor.name %></td>
+                <td class="px-4 py-3 text-sm text-gray-900">$<%= number_with_precision(quote.estimated_cost, precision: 2) %></td>
+                <td class="px-4 py-3 text-sm text-gray-500"><%= quote.work_description %></td>
+                <td class="px-4 py-3 text-sm text-gray-500"><%= quote.estimated_arrival_time %></td>
+              </tr>
+            <% end %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @notes.any? %>
+    <div class="mt-6">
+      <h2 class="text-lg font-semibold text-gray-900">Notes</h2>
+      <div class="mt-4 space-y-3">
+        <% @notes.each do |note| %>
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex justify-between items-start">
+              <p class="text-sm font-medium text-gray-900"><%= note.user.name %> <span class="text-gray-400 font-normal">(<%= note.user.role.humanize %>)</span></p>
+              <p class="text-xs text-gray-400"><%= note.created_at.strftime("%b %d, %Y %l:%M %p") %></p>
+            </div>
+            <p class="mt-1 text-sm text-gray-700"><%= note.content %></p>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+
+  <% if @maintenance_request.images.attached? %>
+    <div class="mt-6">
+      <h2 class="text-lg font-semibold text-gray-900">Images</h2>
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+        <% @maintenance_request.images.each do |image| %>
+          <div class="bg-white rounded-lg shadow overflow-hidden">
+            <%= image_tag rails_blob_path(image, disposition: "inline"), class: "w-full h-48 object-cover" %>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  <% end %>
+</div>

@@ -19,7 +19,8 @@
       "Bash(xcodebuild:*)",
       "Bash(python3:*)",
       "Bash(qlmanage:*)",
-      "Bash(sips:*)"
+      "Bash(sips:*)",
+      "Bash(afplay:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"
