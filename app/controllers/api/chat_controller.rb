@@ -5,13 +5,16 @@ class Api::ChatController < Api::BaseController
     messages = params[:messages] || []
     extracted_info = (params[:extractedInfo] || {}).to_unsafe_h
 
-    # Safety cutoff: if 5+ assistant responses, force completion with whatever we have
+    # Safety cutoff: if 6+ assistant responses, force completion with whatever we have
     assistant_count = messages.count { |m| m[:role] == "assistant" }
-    if assistant_count >= 5
+    if assistant_count >= 6
+      issue_type = extracted_info["issueType"].presence || "maintenance issue"
+      photo_types = %w[leak mold crack stain hole broken damage water]
+      ready_signal = photo_types.any? { |t| issue_type.downcase.include?(t) } ? "READY_FOR_PHOTOS" : "READY_FOR_SUBMISSION"
       return render json: {
-        response: "READY_FOR_SUBMISSION",
+        response: ready_signal,
         extractedInfo: {
-          "issueType" => extracted_info["issueType"].presence || "maintenance issue",
+          "issueType" => issue_type,
           "location" => extracted_info["location"].presence || "unit",
           "severity" => extracted_info["severity"].presence || "moderate",
           "contactPreference" => extracted_info["contactPreference"].presence || "no"
@@ -92,7 +95,7 @@ class Api::ChatController < Api::BaseController
       - For contact preference, ask if it's OK for the service provider (plumber, electrician, exterminator, etc.) to call THEM directly to schedule a visit. Never suggest the tenant handle repairs themselves — all issues will be handled by a professional.
       - You decide when you have enough info. Don't ask unnecessary follow-ups if the tenant already gave clear details.
       - If the tenant gives you most info in one message, don't drag it out with extra questions.
-      - Do NOT ask more than 4 questions total. You have asked #{assistant_count} so far. If this is your 4th question, wrap up and move to completion.
+      - Do NOT ask more than 5 questions total (not counting the initial greeting). You have asked #{assistant_count} so far. If this is your 5th question, wrap up and move to completion.
 
       WHEN DONE gathering info, decide if photos would help:
       - Photos ARE useful for: visible damage (leaks, cracks, mold, stains, holes, broken items)
