@@ -20,7 +20,9 @@
       "Bash(python3:*)",
       "Bash(qlmanage:*)",
       "Bash(sips:*)",
-      "Bash(afplay:*)"
+      "Bash(afplay:*)",
+      "WebSearch",
+      "Bash(git reset:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

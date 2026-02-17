@@ -13,7 +13,8 @@ class PushNotificationService
       return
     end
 
-    fcm = FCM.new(credentials_path)
+    project_id = ENV.fetch("FCM_PROJECT_ID", "prompt-487517")
+    fcm = FCM.new(credentials_path, project_id)
     tokens.each do |token|
       message = {
         token: token,
