@@ -51,6 +51,31 @@ RSpec.describe "Web::Manager::MaintenanceRequests", type: :request do
       expect(response).to redirect_to(root_path)
     end
 
+    it "shows a close request form when not completed" do
+      log_in(manager)
+      get web_manager_maintenance_request_path(mr)
+      expect(response.body).to include("Close Request")
+    end
+  end
+
+  describe "POST /web/manager/maintenance_requests/:id/close" do
+    it "closes the request with a note and redirects" do
+      log_in(manager)
+      post close_web_manager_maintenance_request_path(mr), params: { content: "Not actionable." }
+      expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
+      expect(mr.reload.status).to eq("completed")
+      expect(mr.notes.last.content).to eq("Not actionable.")
+    end
+
+    it "rejects empty notes" do
+      log_in(manager)
+      post close_web_manager_maintenance_request_path(mr), params: { content: "" }
+      expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
+      expect(mr.reload.status).not_to eq("completed")
+    end
+  end
+
+  describe "edge cases" do
     it "returns 404 for requests not belonging to manager's properties" do
       other_mr = create(:maintenance_request)
       log_in(manager)

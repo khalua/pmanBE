@@ -49,6 +49,7 @@ Rails.application.routes.draw do
         resources :quote_requests, only: [ :create ]
         member do
           post :create_note
+          post :close
         end
       end
       resources :quotes, only: [] do
@@ -83,6 +84,7 @@ Rails.application.routes.draw do
     resources :maintenance_requests, only: [ :index, :show, :create, :update ] do
       member do
         post :assign_vendor
+        post :close
       end
       resources :notes, only: [ :index, :create ], controller: "maintenance_requests/notes"
     end

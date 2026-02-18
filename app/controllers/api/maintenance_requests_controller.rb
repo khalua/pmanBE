@@ -1,6 +1,6 @@
 class Api::MaintenanceRequestsController < Api::BaseController
   include Rails.application.routes.url_helpers
-  before_action :set_request, only: [ :show, :update, :assign_vendor ]
+  before_action :set_request, only: [ :show, :update, :assign_vendor, :close ]
 
   def index
     requests = if current_user.tenant?
@@ -41,6 +41,33 @@ class Api::MaintenanceRequestsController < Api::BaseController
     else
       render json: { errors: @maintenance_request.errors.full_messages }, status: :unprocessable_entity
     end
+  end
+
+  def close
+    unless current_user.property_manager? || current_user.super_admin?
+      return render json: { error: "Forbidden" }, status: :forbidden
+    end
+
+    if @maintenance_request.completed?
+      return render json: { error: "Request is already completed" }, status: :unprocessable_entity
+    end
+
+    note_content = params[:note].to_s.strip
+    if note_content.blank?
+      return render json: { error: "A closing note is required" }, status: :unprocessable_entity
+    end
+
+    @maintenance_request.notes.create!(user: current_user, content: note_content)
+    @maintenance_request.update!(status: :completed)
+
+    PushNotificationService.notify(
+      user: @maintenance_request.tenant,
+      title: "Request Closed",
+      body: "Your #{@maintenance_request.issue_type} request has been closed: #{note_content.truncate(80)}",
+      data: { maintenance_request_id: @maintenance_request.id.to_s, type: "request_closed" }
+    )
+
+    render json: request_json(@maintenance_request)
   end
 
   def assign_vendor

@@ -68,6 +68,44 @@ RSpec.describe "Api::MaintenanceRequests", type: :request do
     end
   end
 
+  describe "POST /api/maintenance_requests/:id/close" do
+    it "closes the request and creates a note" do
+      mr = create(:maintenance_request, tenant: tenant, status: :submitted)
+      post "/api/maintenance_requests/#{mr.id}/close",
+        params: { note: "This is not something we can help with." },
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:ok)
+      body = JSON.parse(response.body)
+      expect(body["status"]).to eq("completed")
+      expect(mr.reload.notes.last.content).to eq("This is not something we can help with.")
+      expect(mr.notes.last.user).to eq(pm)
+    end
+
+    it "requires a note" do
+      mr = create(:maintenance_request, tenant: tenant)
+      post "/api/maintenance_requests/#{mr.id}/close",
+        params: { note: "" },
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "rejects tenants from closing requests" do
+      mr = create(:maintenance_request, tenant: tenant)
+      post "/api/maintenance_requests/#{mr.id}/close",
+        params: { note: "closing" },
+        headers: auth_headers(tenant)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "cannot close an already completed request" do
+      mr = create(:maintenance_request, tenant: tenant, status: :completed)
+      post "/api/maintenance_requests/#{mr.id}/close",
+        params: { note: "closing again" },
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
   describe "POST /api/maintenance_requests/:id/assign_vendor" do
     it "assigns a vendor and updates status" do
       mr = create(:maintenance_request, tenant: tenant)
