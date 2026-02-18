@@ -24,7 +24,9 @@
       "WebSearch",
       "Bash(git reset:*)",
       "Bash(bundle exec rails runner:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "WebFetch(domain:unsplash.com)",
+      "Bash(curl:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"
