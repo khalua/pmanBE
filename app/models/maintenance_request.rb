@@ -14,7 +14,8 @@ class MaintenanceRequest < ApplicationRecord
     quote_accepted: 3,
     quote_rejected: 4,
     in_progress: 5,
-    completed: 6
+    completed: 6,
+    closed: 7
   }
 
   validates :issue_type, presence: true

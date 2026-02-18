@@ -50,6 +50,8 @@ Rails.application.routes.draw do
         member do
           post :create_note
           post :close
+          post :mark_in_progress
+          post :mark_complete
         end
       end
       resources :quotes, only: [] do
@@ -85,6 +87,7 @@ Rails.application.routes.draw do
       member do
         post :assign_vendor
         post :close
+        post :mark_complete
       end
       resources :notes, only: [ :index, :create ], controller: "maintenance_requests/notes"
     end

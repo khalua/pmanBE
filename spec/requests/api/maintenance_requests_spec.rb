@@ -69,14 +69,14 @@ RSpec.describe "Api::MaintenanceRequests", type: :request do
   end
 
   describe "POST /api/maintenance_requests/:id/close" do
-    it "closes the request and creates a note" do
+    it "closes the request with status 'closed' and creates a note" do
       mr = create(:maintenance_request, tenant: tenant, status: :submitted)
       post "/api/maintenance_requests/#{mr.id}/close",
         params: { note: "This is not something we can help with." },
         headers: auth_headers(pm)
       expect(response).to have_http_status(:ok)
       body = JSON.parse(response.body)
-      expect(body["status"]).to eq("completed")
+      expect(body["status"]).to eq("closed")
       expect(mr.reload.notes.last.content).to eq("This is not something we can help with.")
       expect(mr.notes.last.user).to eq(pm)
     end
@@ -101,6 +101,54 @@ RSpec.describe "Api::MaintenanceRequests", type: :request do
       mr = create(:maintenance_request, tenant: tenant, status: :completed)
       post "/api/maintenance_requests/#{mr.id}/close",
         params: { note: "closing again" },
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "cannot close an already closed request" do
+      mr = create(:maintenance_request, tenant: tenant, status: :closed)
+      post "/api/maintenance_requests/#{mr.id}/close",
+        params: { note: "closing again" },
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+  end
+
+  describe "POST /api/maintenance_requests/:id/mark_complete" do
+    it "allows a tenant to mark their own request as complete" do
+      mr = create(:maintenance_request, tenant: tenant, status: :in_progress)
+      post "/api/maintenance_requests/#{mr.id}/mark_complete",
+        headers: auth_headers(tenant)
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["status"]).to eq("completed")
+    end
+
+    it "allows a manager to mark a request as complete" do
+      mr = create(:maintenance_request, tenant: tenant, status: :in_progress)
+      post "/api/maintenance_requests/#{mr.id}/mark_complete",
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:ok)
+      expect(mr.reload.status).to eq("completed")
+    end
+
+    it "prevents a tenant from marking another tenant's request complete" do
+      other_tenant = create(:user)
+      mr = create(:maintenance_request, tenant: other_tenant, status: :in_progress)
+      post "/api/maintenance_requests/#{mr.id}/mark_complete",
+        headers: auth_headers(tenant)
+      expect(response).to have_http_status(:forbidden)
+    end
+
+    it "cannot mark an already completed request complete" do
+      mr = create(:maintenance_request, tenant: tenant, status: :completed)
+      post "/api/maintenance_requests/#{mr.id}/mark_complete",
+        headers: auth_headers(pm)
+      expect(response).to have_http_status(:unprocessable_entity)
+    end
+
+    it "cannot mark a closed request complete" do
+      mr = create(:maintenance_request, tenant: tenant, status: :closed)
+      post "/api/maintenance_requests/#{mr.id}/mark_complete",
         headers: auth_headers(pm)
       expect(response).to have_http_status(:unprocessable_entity)
     end

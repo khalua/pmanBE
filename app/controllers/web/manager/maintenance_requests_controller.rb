@@ -16,7 +16,7 @@ class Web::Manager::MaintenanceRequestsController < WebController
     end
 
     @maintenance_request.notes.create!(user: current_user, content: content)
-    @maintenance_request.update!(status: :completed)
+    @maintenance_request.update!(status: :closed)
 
     PushNotificationService.notify(
       user: @maintenance_request.tenant,
@@ -26,6 +26,38 @@ class Web::Manager::MaintenanceRequestsController < WebController
     )
 
     redirect_to web_manager_maintenance_request_path(@maintenance_request), notice: "Request closed."
+  end
+
+  def mark_in_progress
+    @maintenance_request = find_request
+    unless @maintenance_request.quote_accepted? || @maintenance_request.quote_received?
+      redirect_to web_manager_maintenance_request_path(@maintenance_request), alert: "Vendor must have acknowledged the request before marking in progress."
+      return
+    end
+    @maintenance_request.update!(status: :in_progress)
+    PushNotificationService.notify(
+      user: @maintenance_request.tenant,
+      title: "Work Started",
+      body: "Work has started on your #{@maintenance_request.issue_type} request.",
+      data: { maintenance_request_id: @maintenance_request.id.to_s, type: "work_started" }
+    )
+    redirect_to web_manager_maintenance_request_path(@maintenance_request), notice: "Request marked as in progress."
+  end
+
+  def mark_complete
+    @maintenance_request = find_request
+    unless @maintenance_request.in_progress?
+      redirect_to web_manager_maintenance_request_path(@maintenance_request), alert: "Request must be in progress before marking complete."
+      return
+    end
+    @maintenance_request.update!(status: :completed)
+    PushNotificationService.notify(
+      user: @maintenance_request.tenant,
+      title: "Request Completed",
+      body: "Your #{@maintenance_request.issue_type} request has been marked as complete.",
+      data: { maintenance_request_id: @maintenance_request.id.to_s, type: "request_completed" }
+    )
+    redirect_to web_manager_maintenance_request_path(@maintenance_request), notice: "Request marked as complete."
   end
 
   def create_note

@@ -25,6 +25,7 @@
     when "in_progress" then 3
     when "completed" then 4
     when "quote_rejected" then 1
+    when "closed" then 0
     else 0
     end
   %>
@@ -97,6 +98,7 @@
                 when 'quote_rejected' then 'bg-red-100 text-red-800'
                 when 'in_progress' then 'bg-blue-100 text-blue-800'
                 when 'completed' then 'bg-green-100 text-green-800'
+                when 'closed' then 'bg-gray-100 text-gray-600'
                 else 'bg-gray-100 text-gray-800'
                 end %>">
             <%= @maintenance_request.status.humanize %>
@@ -211,7 +213,7 @@
       <p class="text-sm text-gray-400 mb-4">No notes yet.</p>
     <% end %>
 
-    <% unless @maintenance_request.completed? %>
+    <% unless @maintenance_request.completed? || @maintenance_request.closed? %>
       <%= form_with url: create_note_web_tenant_maintenance_request_path(@maintenance_request), method: :post, class: "flex gap-3" do |f| %>
         <%= f.text_field :content, placeholder: "Add a note...", required: true, class: "flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         <%= f.submit "Send", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>

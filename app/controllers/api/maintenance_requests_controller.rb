@@ -1,6 +1,6 @@
 class Api::MaintenanceRequestsController < Api::BaseController
   include Rails.application.routes.url_helpers
-  before_action :set_request, only: [ :show, :update, :assign_vendor, :close ]
+  before_action :set_request, only: [ :show, :update, :assign_vendor, :close, :mark_complete ]
 
   def index
     requests = if current_user.tenant?
@@ -48,7 +48,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
       return render json: { error: "Forbidden" }, status: :forbidden
     end
 
-    if @maintenance_request.completed?
+    if @maintenance_request.completed? || @maintenance_request.closed?
       return render json: { error: "Request is already completed" }, status: :unprocessable_entity
     end
 
@@ -58,7 +58,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
     end
 
     @maintenance_request.notes.create!(user: current_user, content: note_content)
-    @maintenance_request.update!(status: :completed)
+    @maintenance_request.update!(status: :closed)
 
     PushNotificationService.notify(
       user: @maintenance_request.tenant,
@@ -66,6 +66,42 @@ class Api::MaintenanceRequestsController < Api::BaseController
       body: "Your #{@maintenance_request.issue_type} request has been closed: #{note_content.truncate(80)}",
       data: { maintenance_request_id: @maintenance_request.id.to_s, type: "request_closed" }
     )
+
+    render json: request_json(@maintenance_request)
+  end
+
+  def mark_complete
+    # Tenant can mark their own request complete; managers/admins can mark any
+    unless current_user.tenant? && @maintenance_request.tenant_id == current_user.id ||
+           current_user.property_manager? || current_user.super_admin?
+      return render json: { error: "Forbidden" }, status: :forbidden
+    end
+
+    if @maintenance_request.completed? || @maintenance_request.closed?
+      return render json: { error: "Request is already completed" }, status: :unprocessable_entity
+    end
+
+    @maintenance_request.update!(status: :completed)
+
+    # Notify the manager if tenant marked complete
+    if current_user.tenant?
+      manager = @maintenance_request.tenant.unit&.property&.property_manager
+      if manager
+        PushNotificationService.notify(
+          user: manager,
+          title: "Job Marked Complete",
+          body: "#{current_user.name} marked the #{@maintenance_request.issue_type} request as complete.",
+          data: { maintenance_request_id: @maintenance_request.id.to_s, type: "request_completed" }
+        )
+      end
+    else
+      PushNotificationService.notify(
+        user: @maintenance_request.tenant,
+        title: "Request Completed",
+        body: "Your #{@maintenance_request.issue_type} request has been marked as complete.",
+        data: { maintenance_request_id: @maintenance_request.id.to_s, type: "request_completed" }
+      )
+    end
 
     render json: request_json(@maintenance_request)
   end

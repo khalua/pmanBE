@@ -59,11 +59,11 @@ RSpec.describe "Web::Manager::MaintenanceRequests", type: :request do
   end
 
   describe "POST /web/manager/maintenance_requests/:id/close" do
-    it "closes the request with a note and redirects" do
+    it "closes the request with a note and sets status to closed" do
       log_in(manager)
       post close_web_manager_maintenance_request_path(mr), params: { content: "Not actionable." }
       expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
-      expect(mr.reload.status).to eq("completed")
+      expect(mr.reload.status).to eq("closed")
       expect(mr.notes.last.content).to eq("Not actionable.")
     end
 
@@ -71,7 +71,56 @@ RSpec.describe "Web::Manager::MaintenanceRequests", type: :request do
       log_in(manager)
       post close_web_manager_maintenance_request_path(mr), params: { content: "" }
       expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
-      expect(mr.reload.status).not_to eq("completed")
+      expect(mr.reload.status).to eq("submitted")
+    end
+
+    it "hides close button after request is closed" do
+      mr.update!(status: :closed)
+      log_in(manager)
+      get web_manager_maintenance_request_path(mr)
+      expect(response.body).not_to include("Close Request")
+    end
+  end
+
+  describe "POST /web/manager/maintenance_requests/:id/mark_in_progress" do
+    it "marks an acknowledged request as in progress" do
+      mr.update!(status: :quote_accepted)
+      log_in(manager)
+      post mark_in_progress_web_manager_maintenance_request_path(mr)
+      expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
+      expect(mr.reload.status).to eq("in_progress")
+    end
+
+    it "also accepts quote_received status" do
+      mr.update!(status: :quote_received)
+      log_in(manager)
+      post mark_in_progress_web_manager_maintenance_request_path(mr)
+      expect(mr.reload.status).to eq("in_progress")
+    end
+
+    it "rejects if vendor has not yet acknowledged" do
+      mr.update!(status: :vendor_quote_requested)
+      log_in(manager)
+      post mark_in_progress_web_manager_maintenance_request_path(mr)
+      expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
+      expect(mr.reload.status).to eq("vendor_quote_requested")
+    end
+  end
+
+  describe "POST /web/manager/maintenance_requests/:id/mark_complete" do
+    it "marks an in-progress request as completed" do
+      mr.update!(status: :in_progress)
+      log_in(manager)
+      post mark_complete_web_manager_maintenance_request_path(mr)
+      expect(response).to redirect_to(web_manager_maintenance_request_path(mr))
+      expect(mr.reload.status).to eq("completed")
+    end
+
+    it "rejects if request is not in progress" do
+      mr.update!(status: :quote_accepted)
+      log_in(manager)
+      post mark_complete_web_manager_maintenance_request_path(mr)
+      expect(mr.reload.status).to eq("quote_accepted")
     end
   end
 

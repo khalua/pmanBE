@@ -13,17 +13,19 @@
 
   <%# Progress Stepper %>
   <% steps = [
-    { key: "submitted", label: "New Request" },
-    { key: "vendor_quote_requested", label: "Quote Requested" },
-    { key: "quote_received", label: "Quote Received" },
-    { key: "quote_accepted", label: "Quote Accepted" }
+    { key: "submitted",              label: "Request Opened" },
+    { key: "vendor_quote_requested", label: "Vendor Notified" },
+    { key: "quote_accepted",         label: "Vendor Acknowledged" },
+    { key: "in_progress",            label: "In Progress" },
+    { key: "completed",              label: "Completed" }
   ]
   current_index = case @maintenance_request.status
-    when "submitted" then 0
-    when "vendor_quote_requested" then 1
-    when "quote_received" then 2
-    when "quote_accepted", "in_progress", "completed" then 3
-    when "quote_rejected" then 1
+    when "submitted"                        then 0
+    when "vendor_quote_requested"           then 1
+    when "quote_received", "quote_accepted" then 2
+    when "in_progress"                      then 3
+    when "completed"                        then 4
+    when "quote_rejected"                   then 1
     else 0
     end
   %>

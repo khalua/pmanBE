@@ -14,49 +14,82 @@
   <% end %>
 
   <%# Progress Stepper %>
-  <% steps = [
-    { key: "submitted", label: "New Request" },
-    { key: "vendor_quote_requested", label: "Quote Requested" },
-    { key: "quote_received", label: "Quote Received" },
-    { key: "quote_accepted", label: "Quote Accepted" }
-  ]
-  current_index = case @maintenance_request.status
-    when "submitted" then 0
-    when "vendor_quote_requested" then 1
-    when "quote_received" then 2
-    when "quote_accepted", "in_progress", "completed" then 3
-    when "quote_rejected" then 1
-    else 0
-    end
+  <% is_closed = @maintenance_request.closed?
+     steps = [
+       { label: "Request\nOpened" },
+       { label: "Vendor\nNotified" },
+       { label: "Vendor\nAcknowledged" },
+       { label: "In\nProgress" },
+       { label: "Completed" }
+     ]
+     current_index = case @maintenance_request.status
+       when "submitted"                        then 0
+       when "vendor_quote_requested"           then 1
+       when "quote_received", "quote_accepted" then 2
+       when "in_progress"                      then 3
+       when "completed"                        then 4
+       when "quote_rejected"                   then 1
+       when "closed"                           then 0
+       else 0
+       end
   %>
   <div class="mt-6 bg-white shadow rounded-lg p-6">
     <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-4">Process Status</p>
-    <div class="flex items-center">
-      <% steps.each_with_index do |step, i| %>
-        <div class="flex items-center <%= 'flex-1' unless i == steps.length - 1 %>">
-          <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
-            <%= current_index >= i ? 'bg-blue-600' : 'bg-gray-300' %>">
-            <% if current_index > i %>
-              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
-            <% elsif current_index == i %>
-              <div class="w-2 h-2 rounded-full bg-white"></div>
+
+    <% if is_closed %>
+      <div class="flex items-center gap-3 py-2">
+        <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-gray-400">
+          <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700">Request Closed</p>
+          <p class="text-xs text-gray-500">This request was closed by the manager without completing the vendor flow.</p>
+        </div>
+      </div>
+    <% else %>
+      <div class="flex items-center">
+        <% steps.each_with_index do |step, i| %>
+          <div class="flex items-center <%= 'flex-1' unless i == steps.length - 1 %>">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center
+              <%= current_index >= i ? 'bg-blue-600' : 'bg-gray-300' %>">
+              <% if current_index > i %>
+                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+              <% elsif current_index == i %>
+                <div class="w-2 h-2 rounded-full bg-white"></div>
+              <% end %>
+            </div>
+            <% unless i == steps.length - 1 %>
+              <div class="flex-1 h-1 mx-2 <%= current_index > i ? 'bg-blue-600' : 'bg-gray-300' %>"></div>
             <% end %>
           </div>
-          <% unless i == steps.length - 1 %>
-            <div class="flex-1 h-1 mx-2 <%= current_index > i ? 'bg-blue-600' : 'bg-gray-300' %>"></div>
-          <% end %>
+        <% end %>
+      </div>
+      <div class="flex mt-2">
+        <% steps.each_with_index do |step, i| %>
+          <div class="<%= i == steps.length - 1 ? 'text-right' : (i == 0 ? 'text-left' : 'text-center') %> flex-1">
+            <span class="text-xs whitespace-pre-line leading-tight <%= current_index >= i ? 'text-gray-700 font-medium' : 'text-gray-400' %>"><%= step[:label] %></span>
+          </div>
+        <% end %>
+      </div>
+      <% if @maintenance_request.quote_rejected? %>
+        <p class="mt-3 text-xs font-medium text-orange-600">Quote rejected — select a different vendor or send new quote requests</p>
+      <% end %>
+
+      <%# Contextual action buttons based on current status %>
+      <% if @maintenance_request.quote_accepted? || @maintenance_request.quote_received? %>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <%= button_to "Mark as In Progress", mark_in_progress_web_manager_maintenance_request_path(@maintenance_request), method: :post,
+              data: { turbo_confirm: "Mark this request as in progress? The tenant will be notified." },
+              class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>
+        </div>
+      <% elsif @maintenance_request.in_progress? %>
+        <div class="mt-4 pt-4 border-t border-gray-100">
+          <%= button_to "Mark as Complete", mark_complete_web_manager_maintenance_request_path(@maintenance_request), method: :post,
+              data: { turbo_confirm: "Mark this request as complete? The tenant will be notified." },
+              class: "inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 cursor-pointer" %>
+          <p class="mt-2 text-xs text-gray-500">The tenant can also mark this complete from the app.</p>
         </div>
       <% end %>
-    </div>
-    <div class="flex mt-2">
-      <% steps.each_with_index do |step, i| %>
-        <div class="<%= i == steps.length - 1 ? 'text-right' : (i == 0 ? 'text-left' : 'text-center') %> flex-1">
-          <span class="text-xs <%= current_index >= i ? 'text-gray-700' : 'text-gray-400' %>"><%= step[:label] %></span>
-        </div>
-      <% end %>
-    </div>
-    <% if @maintenance_request.quote_rejected? %>
-      <p class="mt-3 text-xs font-medium text-orange-600">Quote rejected — select a different vendor</p>
     <% end %>
   </div>
 
@@ -112,6 +145,7 @@
                 when 'quote_rejected' then 'bg-red-100 text-red-800'
                 when 'in_progress' then 'bg-blue-100 text-blue-800'
                 when 'completed' then 'bg-green-100 text-green-800'
+                when 'closed' then 'bg-gray-100 text-gray-600'
                 else 'bg-gray-100 text-gray-800'
                 end %>">
             <%= @maintenance_request.status.humanize %>
@@ -274,7 +308,7 @@
       <p class="text-sm text-gray-400 mb-4">No notes yet.</p>
     <% end %>
 
-    <% unless @maintenance_request.completed? %>
+    <% unless @maintenance_request.completed? || @maintenance_request.closed? %>
       <%= form_with url: create_note_web_manager_maintenance_request_path(@maintenance_request), method: :post, class: "flex gap-3" do |f| %>
         <%= f.text_field :content, placeholder: "Add a note...", required: true, class: "flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm" %>
         <%= f.submit "Send", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>
@@ -285,7 +319,7 @@
   <%# Send quote requests form %>
   <% already_requested_ids = @maintenance_request.quote_requests.pluck(:vendor_id) %>
   <% requestable_vendors = @vendors.where.not(id: already_requested_ids) %>
-  <% if requestable_vendors.any? %>
+  <% if requestable_vendors.any? && !@maintenance_request.completed? && !@maintenance_request.closed? && !@maintenance_request.in_progress? %>
     <div class="mt-6 bg-white shadow rounded-lg p-6">
       <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Quotes</h2>
       <%= form_with url: web_manager_maintenance_request_quote_requests_path(@maintenance_request), method: :post do |f| %>
@@ -305,7 +339,7 @@
     </div>
   <% end %>
 
-  <% unless @maintenance_request.completed? %>
+  <% unless @maintenance_request.completed? || @maintenance_request.closed? %>
     <div class="mt-6 bg-white shadow rounded-lg p-6 border border-red-200">
       <h2 class="text-lg font-semibold text-gray-900 mb-2">Close Request</h2>
       <p class="text-sm text-gray-500 mb-4">Close this request without going through the vendor flow. The tenant will be notified with your explanation.</p>
