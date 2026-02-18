@@ -16,6 +16,7 @@
           <% if current_user %>
             <%= link_to "Dashboard", user_dashboard_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
             <% if current_user.property_manager? %>
+              <%= link_to "Properties", web_manager_properties_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
               <%= link_to "Tenants", web_manager_tenants_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
               <%= link_to "Vendors", web_manager_vendors_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
             <% end %>

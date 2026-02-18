@@ -1,0 +1,51 @@
+<% content_for(:title) { "My Properties - Prompt" } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">My Properties</h1>
+    <%= link_to "Add Property", new_web_manager_property_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+  </div>
+
+  <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name / Address</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Units</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% @properties.each do |property| %>
+          <tr class="hover:bg-gray-50">
+            <td class="px-4 py-3">
+              <p class="text-sm font-medium text-gray-900"><%= property.name.presence || property.address %></p>
+              <% if property.name.present? %>
+                <p class="text-xs text-gray-400"><%= property.address %></p>
+              <% end %>
+            </td>
+            <td class="px-4 py-3">
+              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= property.house? ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800' %>">
+                <%= property.property_type.humanize %>
+              </span>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= property.units.size %></td>
+            <td class="px-4 py-3 text-sm flex gap-3">
+              <%= link_to "View", web_manager_property_path(property), class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+              <%= link_to "Edit", edit_web_manager_property_path(property), class: "text-gray-600 hover:text-gray-800 font-medium" %>
+              <%= button_to "Delete", web_manager_property_path(property), method: :delete,
+                    data: { turbo_confirm: "Delete #{property.name.presence || property.address}?" },
+                    class: "text-red-600 hover:text-red-800 font-medium" %>
+            </td>
+          </tr>
+        <% end %>
+        <% if @properties.empty? %>
+          <tr>
+            <td colspan="4" class="px-4 py-6 text-sm text-gray-400 text-center">No properties yet. <%= link_to "Add your first property", new_web_manager_property_path, class: "text-indigo-600 hover:text-indigo-800" %>.</td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  </div>
+</div>

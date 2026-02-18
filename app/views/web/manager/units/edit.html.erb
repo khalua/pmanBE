@@ -1,0 +1,55 @@
+<% content_for(:title) { "Edit Unit - Prompt" } %>
+
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Edit Unit <%= @unit.identifier %></h1>
+    <%= link_to "Back", web_manager_property_path(@property), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+  </div>
+
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <%= form_with(model: [:web, :manager, @property, @unit], class: "space-y-6") do |f| %>
+      <% if @unit.errors.any? %>
+        <div class="bg-red-50 border border-red-200 rounded-md p-4">
+          <ul class="list-disc list-inside text-sm text-red-600">
+            <% @unit.errors.full_messages.each do |msg| %>
+              <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
+
+      <div>
+        <%= f.label :identifier, "Unit Identifier", class: "block text-sm font-medium text-gray-700" %>
+        <%= f.text_field :identifier, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2", required: true %>
+      </div>
+
+      <div>
+        <%= f.label :floor, class: "block text-sm font-medium text-gray-700" %>
+        <%= f.number_field :floor, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2" %>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-gray-700">Current Tenants</label>
+        <% if @unit.tenants.any? %>
+          <ul class="mt-2 space-y-1">
+            <% @unit.tenants.each do |tenant| %>
+              <li class="flex items-center justify-between text-sm text-gray-700 bg-gray-50 rounded px-3 py-2">
+                <span><%= tenant.name %> (<%= tenant.email %>)</span>
+                <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "text-xs text-indigo-600 hover:text-indigo-800" %>
+              </li>
+            <% end %>
+          </ul>
+        <% else %>
+          <p class="mt-1 text-sm text-gray-400">No tenants assigned. Use invitation codes to onboard tenants.</p>
+        <% end %>
+        <p class="mt-2 text-xs text-gray-400">
+          <%= link_to "Manage invitations for this unit", web_manager_property_invitations_path(@property), class: "text-indigo-600 hover:text-indigo-800" %>
+        </p>
+      </div>
+
+      <div>
+        <%= f.submit "Update Unit", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,0 +1,12 @@
+<% content_for(:title) { "Edit Property - Prompt" } %>
+
+<div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="flex justify-between items-center">
+    <h1 class="text-2xl font-bold text-gray-900">Edit Property</h1>
+    <%= link_to "Back", web_manager_property_path(@property), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+  </div>
+
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <%= render "form", property: @property %>
+  </div>
+</div>

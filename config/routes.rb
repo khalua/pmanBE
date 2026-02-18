@@ -38,7 +38,8 @@ Rails.application.routes.draw do
         end
       end
       resources :vendors, only: [ :index, :create, :destroy ]
-      resources :properties, only: [] do
+      resources :properties, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
+        resources :units, only: [ :new, :create, :edit, :update, :destroy ]
         resources :invitations, only: [ :index, :create ] do
           member do
             post :revoke
@@ -117,9 +118,9 @@ Rails.application.routes.draw do
       resources :maintenance_requests, only: [] do
         resources :quote_requests, only: [ :index, :create ]
       end
-      resources :properties, only: [] do
+      resources :properties, only: [ :index, :show, :create, :update, :destroy ] do
         resources :invitations, only: [ :index ]
-        resources :units, only: [] do
+        resources :units, only: [ :create, :update, :destroy ] do
           resources :invitations, only: [ :create ]
         end
       end
