@@ -52,12 +52,12 @@ class VendorPortalController < ApplicationController
       end.join
 
       modified_html = modified_html.sub(
-        /<div class="photo-grid">[\s\S]*?<\/div>/,
-        "<div class=\"photo-grid\">#{photo_elements}</div>"
+        /<!-- PHOTOS_SECTION_START -->[\s\S]*?<!-- PHOTOS_SECTION_END -->/,
+        "<div class=\"photos\"><h3>Photos</h3><div class=\"photo-grid\">#{photo_elements}</div></div>"
       )
     else
       modified_html = modified_html.sub(
-        /<div class="photos">[\s\S]*?<\/div>\s*<\/div>/,
+        /<!-- PHOTOS_SECTION_START -->[\s\S]*?<!-- PHOTOS_SECTION_END -->/,
         ""
       )
     end

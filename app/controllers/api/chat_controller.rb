@@ -9,8 +9,7 @@ class Api::ChatController < Api::BaseController
     assistant_count = messages.count { |m| m[:role] == "assistant" }
     if assistant_count >= 6
       issue_type = extracted_info["issueType"].presence || "maintenance issue"
-      photo_types = %w[leak mold crack stain hole broken damage water]
-      ready_signal = photo_types.any? { |t| issue_type.downcase.include?(t) } ? "READY_FOR_PHOTOS" : "READY_FOR_SUBMISSION"
+      ready_signal = "READY_FOR_PHOTOS"
       return render json: {
         response: ready_signal,
         extractedInfo: {
@@ -124,12 +123,8 @@ class Api::ChatController < Api::BaseController
       - If the tenant gives you most info in one message, don't drag it out with extra questions.
       - Do NOT ask more than 5 questions total (not counting the initial greeting). You have asked #{assistant_count} so far. If this is your 5th question, wrap up and move to completion.
 
-      WHEN DONE gathering info, decide if photos would help:
-      - Photos ARE useful for: leaks, water damage, cracks, mold, stains, holes, structural damage, visible pest damage (droppings, chewed materials, nests)
-      - Photos are NOT useful for: smells, sounds, temperature issues, appliance malfunctions (oven, fridge, dishwasher, washer/dryer), electrical issues, pest sightings without visible damage, lock/door issues
-      - If photos would help, respond with exactly: READY_FOR_PHOTOS
-      - If photos would NOT help, respond with exactly: READY_FOR_SUBMISSION
-      - Do NOT include any other text when responding with READY_FOR_PHOTOS or READY_FOR_SUBMISSION.
+      WHEN DONE gathering info, ALWAYS respond with exactly: READY_FOR_PHOTOS
+      - Do NOT include any other text when responding with READY_FOR_PHOTOS.
 
       When your question has a small set of likely answers (2-4 options), append on a NEW line:
       OPTIONS:["Option 1","Option 2"]
