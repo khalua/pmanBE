@@ -6,4 +6,12 @@ class Property < ApplicationRecord
 
   validates :address, presence: true
   validates :property_type, presence: true
+
+  after_create :create_default_unit_for_house
+
+  private
+
+  def create_default_unit_for_house
+    units.create!(identifier: "Main Unit") if house?
+  end
 end

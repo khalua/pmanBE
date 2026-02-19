@@ -1,15 +1,16 @@
 <% content_for(:title) { "#{@property.name || @property.address} - Prompt" } %>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex justify-between items-center">
+  <%= link_to "← Properties", web_admin_properties_path, class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+  <div class="mt-3 flex justify-between items-center">
     <div>
       <h1 class="text-2xl font-bold text-gray-900"><%= @property.name.presence || @property.address %></h1>
       <p class="mt-1 text-sm text-gray-500"><%= @property.address %></p>
     </div>
     <div class="flex gap-3">
-      <%= link_to "Back", web_admin_properties_path, class: "text-sm text-indigo-600 hover:text-indigo-800" %>
       <%= link_to "Edit Property", edit_web_admin_property_path(@property), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
-      <%= link_to "Add Unit", new_web_admin_property_unit_path(@property), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+      <% unit_label = @property.house? ? "Add Unit / Room" : "Add Unit" %>
+      <%= link_to unit_label, new_web_admin_property_unit_path(@property), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
     </div>
   </div>
 
@@ -29,7 +30,11 @@
   </div>
 
   <div class="mt-8">
-    <h2 class="text-lg font-semibold text-gray-900">Units</h2>
+    <% units_heading = @property.house? ? "Units / Rooms" : "Units" %>
+    <h2 class="text-lg font-semibold text-gray-900"><%= units_heading %></h2>
+    <% if @property.house? %>
+      <p class="text-sm text-gray-500 mt-1">Houses can have multiple units (e.g. for multifamily homes). A default "Main Unit" is created automatically.</p>
+    <% end %>
     <div class="mt-4 bg-white shadow rounded-lg overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -46,12 +51,21 @@
               <td class="px-4 py-3 text-sm font-medium text-gray-900"><%= unit.identifier %></td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= unit.floor || "-" %></td>
               <td class="px-4 py-3 text-sm text-gray-500">
-                <% if unit.tenants.any? %>
-                  <% unit.tenants.each do |tenant| %>
+                <% current = unit.current_tenants %>
+                <% past = unit.past_tenants %>
+                <% if current.any? %>
+                  <% current.each do |tenant| %>
                     <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 mr-1"><%= tenant.name %></span>
                   <% end %>
                 <% else %>
                   <span class="text-gray-400">Vacant</span>
+                <% end %>
+                <% if past.any? %>
+                  <div class="mt-1">
+                    <% past.each do |tenant| %>
+                      <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-500 mr-1" title="Former — moved out <%= tenant.move_out_date&.strftime('%b %d, %Y') %>"><%= tenant.name %></span>
+                    <% end %>
+                  </div>
                 <% end %>
               </td>
               <td class="px-4 py-3 text-sm flex gap-2">
@@ -64,7 +78,8 @@
           <% end %>
           <% if @units.empty? %>
             <tr>
-              <td colspan="4" class="px-4 py-6 text-sm text-gray-400 text-center">No units yet.</td>
+              <% empty_label = @property.house? ? "Add a unit or room" : "Add a unit" %>
+              <td colspan="4" class="px-4 py-6 text-sm text-gray-400 text-center">No units yet. <%= link_to empty_label, new_web_admin_property_unit_path(@property), class: "text-indigo-600 hover:text-indigo-800" %>.</td>
             </tr>
           <% end %>
         </tbody>

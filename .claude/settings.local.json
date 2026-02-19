@@ -26,7 +26,10 @@
       "Bash(bundle exec rails runner:*)",
       "Bash(grep:*)",
       "WebFetch(domain:unsplash.com)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(/Users/tony/Documents/Code/pmanBE/app/models/unit.rb:*)",
+      "Bash(/Users/tony/Documents/Code/pmanBE/app/views/web/manager/tenants/show.html.erb:*)",
+      "Bash(/Users/tony/Documents/Code/pmanBE/app/views/web/manager/units/edit.html.erb:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

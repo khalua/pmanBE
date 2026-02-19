@@ -8,7 +8,7 @@ class Web::Admin::PropertiesController < WebController
   end
 
   def show
-    @units = @property.units.includes(:tenant).order(:identifier)
+    @units = @property.units.includes(:tenants).order(:identifier)
   end
 
   def new

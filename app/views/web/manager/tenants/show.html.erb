@@ -1,28 +1,36 @@
 <% content_for(:title) { "#{@tenant.name} - Tenant Details" } %>
 
+<% is_active = @tenant.move_out_date.nil? || @tenant.move_out_date >= Date.current %>
+<% is_future_moveout = @tenant.move_out_date.present? && @tenant.move_out_date > Date.current %>
+
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  <div class="flex justify-between items-center">
+  <%# Breadcrumb nav %>
+  <nav class="flex items-center gap-2 text-sm text-gray-500 mb-4">
+    <%= link_to "Tenants", web_manager_tenants_path, class: "text-indigo-600 hover:text-indigo-800" %>
+    <span>/</span>
+    <% if @tenant.unit %>
+      <%= link_to @tenant.unit.property.name.presence || @tenant.unit.property.address,
+            web_manager_property_path(@tenant.unit.property),
+            class: "text-indigo-600 hover:text-indigo-800" %>
+      <span>/</span>
+      <%= link_to @tenant.unit.identifier,
+            edit_web_manager_property_unit_path(@tenant.unit.property, @tenant.unit),
+            class: "text-indigo-600 hover:text-indigo-800" %>
+      <span>/</span>
+    <% end %>
+    <span class="text-gray-700"><%= @tenant.name %></span>
+  </nav>
+
+  <div class="flex justify-between items-start">
     <div class="flex items-center gap-3">
       <h1 class="text-2xl font-bold text-gray-900"><%= @tenant.name %></h1>
-      <% if @tenant.active? %>
+      <% if is_future_moveout %>
+        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">Moving out <%= @tenant.move_out_date.strftime("%b %d") %></span>
+      <% elsif is_active %>
         <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
       <% else %>
-        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">Inactive</span>
+        <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-600">Former Tenant</span>
       <% end %>
-    </div>
-    <div class="flex items-center gap-3">
-      <% if @tenant.active? %>
-        <%= button_to "Move Out", move_out_web_manager_tenant_path(@tenant),
-              method: :post,
-              data: { turbo_confirm: "Move out #{@tenant.name}? This will deactivate their account." },
-              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700" %>
-      <% else %>
-        <%= button_to "Reactivate", activate_web_manager_tenant_path(@tenant),
-              method: :post,
-              data: { turbo_confirm: "Reactivate #{@tenant.name}?" },
-              class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
-      <% end %>
-      <%= link_to "Back to Dashboard", web_manager_dashboard_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
     </div>
   </div>
 
@@ -33,46 +41,100 @@
     <div class="mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg"><%= flash[:alert] %></div>
   <% end %>
 
-  <div class="mt-6 bg-white shadow rounded-lg p-6">
-    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tenant Information</h2>
-    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Name</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.name %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Email</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.email %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Mobile Phone</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.mobile_phone.presence || "-" %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Home Phone</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.home_phone.presence || "-" %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Property</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.unit&.property&.name.presence || @tenant.unit&.property&.address || "-" %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Unit</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.unit&.identifier || "-" %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Move-in Date</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.move_in_date&.strftime("%B %d, %Y") || "-" %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Move-out Date</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.move_out_date&.strftime("%B %d, %Y") || "-" %></dd>
-      </div>
-      <div>
-        <dt class="text-sm font-medium text-gray-500">Phone Verified</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @tenant.phone_verified? ? "Yes" : "No" %></dd>
-      </div>
-    </dl>
+  <% unless is_active %>
+    <div class="mt-4 bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-lg text-sm">
+      This tenant is no longer active at this property. Their record is kept for archival purposes.
+    </div>
+  <% end %>
+
+  <div class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <%# Left: Tenant info %>
+    <div class="lg:col-span-2 bg-white shadow rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-4">Tenant Information</h2>
+      <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Name</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.name %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Email</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.email %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Mobile Phone</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.mobile_phone.presence || "-" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Home Phone</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.home_phone.presence || "-" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Property</dt>
+          <dd class="mt-1 text-sm">
+            <% if @tenant.unit&.property %>
+              <%= link_to @tenant.unit.property.name.presence || @tenant.unit.property.address,
+                    web_manager_property_path(@tenant.unit.property),
+                    class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+            <% else %>
+              <span class="text-gray-400">-</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Unit</dt>
+          <dd class="mt-1 text-sm">
+            <% if @tenant.unit %>
+              <%= link_to @tenant.unit.identifier,
+                    edit_web_manager_property_unit_path(@tenant.unit.property, @tenant.unit),
+                    class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+            <% else %>
+              <span class="text-gray-400">-</span>
+            <% end %>
+          </dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Move-in Date</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.move_in_date&.strftime("%B %d, %Y") || "-" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Move-out Date</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.move_out_date&.strftime("%B %d, %Y") || "-" %></dd>
+        </div>
+        <div>
+          <dt class="text-sm font-medium text-gray-500">Phone Verified</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.phone_verified? ? "Yes" : "No" %></dd>
+        </div>
+      </dl>
+    </div>
+
+    <%# Right: Move-out / Reactivate panel %>
+    <div class="bg-white shadow rounded-lg p-6">
+      <% if is_active %>
+        <h2 class="text-lg font-semibold text-gray-900 mb-1">Move Out</h2>
+        <p class="text-sm text-gray-500 mb-4">Set a move-out date. The unit will appear vacant after that date.</p>
+        <%= form_with url: move_out_web_manager_tenant_path(@tenant), method: :post, class: "space-y-4" do |f| %>
+          <div>
+            <label class="block text-sm font-medium text-gray-700">Move-out Date</label>
+            <%= f.date_field :move_out_date,
+                  name: "tenant[move_out_date]",
+                  value: @tenant.move_out_date || Date.current,
+                  class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-3 py-2" %>
+          </div>
+          <% btn_label = is_future_moveout ? "Update Move-out Date" : "Set Move-out Date" %>
+          <% confirm_msg = is_future_moveout ? "Update move-out date for #{@tenant.name}?" : "Move out #{@tenant.name}?" %>
+          <%= f.submit btn_label,
+                data: { turbo_confirm: confirm_msg },
+                class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 cursor-pointer" %>
+        <% end %>
+      <% else %>
+        <h2 class="text-lg font-semibold text-gray-900 mb-1">Reactivate</h2>
+        <p class="text-sm text-gray-500 mb-4">Clear the move-out date to reactivate this tenant at their unit.</p>
+        <%= button_to "Reactivate Tenant", activate_web_manager_tenant_path(@tenant),
+              method: :post,
+              data: { turbo_confirm: "Reactivate #{@tenant.name}? This will clear their move-out date." },
+              class: "w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700" %>
+      <% end %>
+    </div>
   </div>
 
   <div class="mt-10">
@@ -115,7 +177,7 @@
                       when 'quote_rejected' then 'bg-red-100 text-red-800'
                       when 'in_progress' then 'bg-blue-100 text-blue-800'
                       when 'completed' then 'bg-green-100 text-green-800'
-                        when 'closed' then 'bg-gray-100 text-gray-600'
+                      when 'closed' then 'bg-gray-100 text-gray-600'
                       else 'bg-gray-100 text-gray-800'
                       end %>">
                   <%= req.status.humanize %>

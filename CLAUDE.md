@@ -40,11 +40,3 @@ Rails 7.2 API-only backend for a property management app. PostgreSQL database, J
 **AI integration**: `Api::ChatController` uses the `anthropic` gem for chat and summarization endpoints.
 
 **Environment**: uses `dotenv-rails` for env vars in development.
-
-## IMPORTANT: Sound Notification
-
-After finishing responding to my request or running a command, run this command to notify me by sound:
-
-```bash
-afplay /System/Library/Sounds/Funk.aiff
-```

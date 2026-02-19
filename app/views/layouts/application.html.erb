@@ -30,7 +30,7 @@
         <div class="flex items-center space-x-4">
           <% if current_user %>
             <%= link_to current_user.name, web_preferences_path, class: "text-gray-700 text-sm hover:text-indigo-600" %>
-            <%= button_to "Log out", logout_path, method: :delete, form_class: "inline", class: "text-sm text-gray-500 hover:text-gray-700" %>
+            <%= button_to "Log out", logout_path, method: :delete, form_class: "flex items-center", class: "text-sm text-gray-500 hover:text-gray-700 bg-transparent border-0 p-0 m-0 cursor-pointer" %>
           <% else %>
             <%= link_to "Log in", login_path, class: "text-sm text-gray-500 hover:text-gray-700" %>
           <% end %>

@@ -3,7 +3,7 @@
 <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold text-gray-900">Edit Unit <%= @unit.identifier %></h1>
-    <%= link_to "Back", web_manager_property_path(@property), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+    <%= link_to "Back to #{@property.name.presence || @property.address}", web_manager_property_path(@property), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
   </div>
 
   <div class="mt-6 bg-white shadow rounded-lg p-6">
@@ -30,22 +30,38 @@
 
       <div>
         <label class="block text-sm font-medium text-gray-700">Current Tenants</label>
-        <% if @unit.tenants.any? %>
+        <% current = @unit.current_tenants %>
+        <% if current.any? %>
           <ul class="mt-2 space-y-1">
-            <% @unit.tenants.each do |tenant| %>
-              <li class="flex items-center justify-between text-sm text-gray-700 bg-gray-50 rounded px-3 py-2">
+            <% current.each do |tenant| %>
+              <li class="flex items-center justify-between text-sm text-gray-700 bg-green-50 rounded px-3 py-2">
                 <span><%= tenant.name %> (<%= tenant.email %>)</span>
-                <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "text-xs text-indigo-600 hover:text-indigo-800" %>
+                <%= link_to "View", web_manager_tenant_path(tenant), class: "text-xs text-indigo-600 hover:text-indigo-800" %>
               </li>
             <% end %>
           </ul>
         <% else %>
-          <p class="mt-1 text-sm text-gray-400">No tenants assigned. Use invitation codes to onboard tenants.</p>
+          <p class="mt-1 text-sm text-gray-400">No current tenants. Use invitation codes to onboard tenants.</p>
         <% end %>
         <p class="mt-2 text-xs text-gray-400">
           <%= link_to "Manage invitations for this unit", web_manager_property_invitations_path(@property), class: "text-indigo-600 hover:text-indigo-800" %>
         </p>
       </div>
+
+      <% past = @unit.past_tenants %>
+      <% if past.any? %>
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Past Tenants</label>
+          <ul class="mt-2 space-y-1">
+            <% past.each do |tenant| %>
+              <li class="flex items-center justify-between text-sm text-gray-500 bg-gray-50 rounded px-3 py-2">
+                <span><%= tenant.name %> — moved out <%= tenant.move_out_date.strftime("%b %d, %Y") %></span>
+                <%= link_to "View record", web_manager_tenant_path(tenant), class: "text-xs text-indigo-600 hover:text-indigo-800" %>
+              </li>
+            <% end %>
+          </ul>
+        </div>
+      <% end %>
 
       <div>
         <%= f.submit "Update Unit", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 cursor-pointer" %>
