@@ -1,11 +1,13 @@
 FactoryBot.define do
   factory :vendor do
     name { Faker::Company.name }
+    cell_phone { Faker::PhoneNumber.cell_phone }
     phone_number { Faker::PhoneNumber.phone_number }
     vendor_type { :plumbing }
-    rating { 4.5 }
     is_available { true }
-    location { Faker::Address.city }
-    specialties { ["pipes", "drains"] }
+    address { Faker::Address.full_address }
+    contact_name { Faker::Name.name }
+    email { Faker::Internet.email }
+    specialties { [ "pipes", "drains" ] }
   end
 end

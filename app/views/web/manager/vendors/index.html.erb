@@ -3,7 +3,10 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
   <div class="flex justify-between items-center">
     <h1 class="text-2xl font-bold text-gray-900">Your Vendors</h1>
-    <%= link_to "Back to Dashboard", web_manager_dashboard_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+    <div class="flex items-center gap-4">
+      <%= link_to "Add New Vendor", new_web_manager_vendor_path, class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700" %>
+      <%= link_to "Back to Dashboard", web_manager_dashboard_path, class: "text-sm text-blue-600 hover:text-blue-800" %>
+    </div>
   </div>
 
   <% if flash[:notice] %>
@@ -13,57 +16,86 @@
     <div class="mt-4 bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg"><%= flash[:alert] %></div>
   <% end %>
 
-  <%# Add vendor form %>
-  <% if @available_vendors.any? %>
-    <div class="mt-6 bg-white shadow rounded-lg p-6">
-      <h2 class="text-lg font-semibold text-gray-900 mb-4">Add a Vendor</h2>
-      <%= form_with url: web_manager_vendors_path, method: :post, class: "flex items-end gap-4" do |f| %>
-        <div class="flex-1">
-          <label for="vendor_id" class="block text-sm font-medium text-gray-700">Select Vendor</label>
-          <select name="vendor_id" id="vendor_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2 px-3 border">
-            <% @available_vendors.each do |v| %>
-              <option value="<%= v.id %>"><%= v.name %> — <%= v.vendor_type %></option>
-            <% end %>
-          </select>
-        </div>
-        <%= f.submit "Add Vendor", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>
-      <% end %>
-    </div>
-  <% end %>
-
-  <%# Current vendors table %>
   <div class="mt-6 bg-white shadow rounded-lg overflow-hidden">
     <table class="min-w-full divide-y divide-gray-200">
       <thead class="bg-gray-50">
         <tr>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Type</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cell Phone</th>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
-          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Available</th>
+          <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
           <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-gray-200">
         <% @vendors.each do |vendor| %>
-          <tr>
-            <td class="px-4 py-3 text-sm font-medium text-gray-900"><%= vendor.name %></td>
-            <td class="px-4 py-3 text-sm text-gray-500"><%= vendor.vendor_type %></td>
-            <td class="px-4 py-3 text-sm text-gray-500"><%= vendor.phone_number || "-" %></td>
-            <td class="px-4 py-3 text-sm text-gray-500"><%= vendor.rating ? "#{vendor.rating}/5" : "-" %></td>
+          <% active = vendor.is_active %>
+          <tr class="<%= active ? '' : 'bg-gray-50 opacity-60' %>">
             <td class="px-4 py-3">
-              <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full <%= vendor.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                <%= vendor.is_available ? "Yes" : "No" %>
-              </span>
+              <div class="text-sm font-medium text-gray-900"><%= vendor.name %></div>
+              <% if vendor.address.present? %>
+                <div class="text-xs text-gray-400"><%= vendor.address %></div>
+              <% end %>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= vendor.vendor_type&.humanize %></td>
+            <td class="px-4 py-3">
+              <div class="text-sm text-gray-700"><%= vendor.contact_name.presence || "—" %></div>
+              <% if vendor.email.present? %>
+                <div class="text-xs text-gray-400"><%= vendor.email %></div>
+              <% end %>
+            </td>
+            <td class="px-4 py-3 text-sm text-blue-600">
+              <% if vendor.cell_phone.present? %>
+                <a href="tel:<%= vendor.cell_phone %>"><%= vendor.cell_phone %></a>
+              <% else %>
+                —
+              <% end %>
             </td>
             <td class="px-4 py-3">
-              <%= button_to "Remove", web_manager_vendor_path(vendor), method: :delete, class: "text-sm text-red-600 hover:text-red-800 font-medium", data: { turbo_confirm: "Remove #{vendor.name} from your vendors?" } %>
+              <% avg = vendor.average_rating %>
+              <% if avg %>
+                <div class="flex items-center gap-1">
+                  <% full_stars = avg.floor %>
+                  <% full_stars.times do %>
+                    <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                  <% end %>
+                  <% (5 - full_stars).times do %>
+                    <svg class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                  <% end %>
+                  <span class="text-xs text-gray-500 ml-1"><%= avg %></span>
+                </div>
+              <% else %>
+                <span class="text-xs text-gray-400">No ratings yet</span>
+              <% end %>
+            </td>
+            <td class="px-4 py-3">
+              <% if active %>
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+              <% else %>
+                <span class="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-500">Inactive</span>
+              <% end %>
+            </td>
+            <td class="px-4 py-3">
+              <div class="flex items-center gap-3 text-sm">
+                <%= link_to "View", web_manager_vendor_path(vendor), class: "text-blue-600 hover:text-blue-800 font-medium" %>
+                <%= link_to "Edit", edit_web_manager_vendor_path(vendor), class: "text-gray-600 hover:text-gray-800 font-medium" %>
+                <%= button_to active ? "Deactivate" : "Activate", toggle_active_web_manager_vendor_path(vendor), method: :patch,
+                    class: "text-sm font-medium #{active ? 'text-yellow-600 hover:text-yellow-800' : 'text-green-600 hover:text-green-800'}" %>
+                <%= button_to "Remove", web_manager_vendor_path(vendor), method: :delete,
+                    class: "text-sm text-red-600 hover:text-red-800 font-medium",
+                    data: { turbo_confirm: "Remove #{vendor.name}? This cannot be undone." } %>
+              </div>
             </td>
           </tr>
         <% end %>
         <% if @vendors.empty? %>
           <tr>
-            <td colspan="6" class="px-4 py-6 text-sm text-gray-400 text-center">No vendors added yet.</td>
+            <td colspan="7" class="px-4 py-10 text-center">
+              <p class="text-sm text-gray-400 mb-3">No vendors yet.</p>
+              <%= link_to "Add your first vendor", new_web_manager_vendor_path, class: "text-sm text-blue-600 hover:text-blue-800 font-medium" %>
+            </td>
           </tr>
         <% end %>
       </tbody>

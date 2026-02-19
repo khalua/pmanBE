@@ -1,6 +1,6 @@
 class Api::MaintenanceRequestsController < Api::BaseController
   include Rails.application.routes.url_helpers
-  before_action :set_request, only: [ :show, :update, :assign_vendor, :close, :mark_complete ]
+  before_action :set_request, only: [ :show, :update, :assign_vendor, :close, :mark_complete, :rate_vendor ]
 
   def index
     requests = if current_user.tenant?
@@ -110,6 +110,28 @@ class Api::MaintenanceRequestsController < Api::BaseController
     vendor = Vendor.find(params[:vendor_id])
     @maintenance_request.update!(assigned_vendor: vendor, status: :vendor_quote_requested)
     render json: request_json(@maintenance_request)
+  end
+
+  def rate_vendor
+    unless current_user.tenant? && @maintenance_request.tenant_id == current_user.id
+      return render json: { error: "Forbidden" }, status: :forbidden
+    end
+
+    unless @maintenance_request.assigned_vendor_id.present?
+      return render json: { error: "No vendor assigned to this request" }, status: :unprocessable_entity
+    end
+
+    rating = VendorRating.find_or_initialize_by(
+      vendor_id: @maintenance_request.assigned_vendor_id,
+      maintenance_request_id: @maintenance_request.id
+    )
+    rating.assign_attributes(tenant: current_user, stars: params[:stars], comment: params[:comment])
+
+    if rating.save
+      render json: { stars: rating.stars, comment: rating.comment }
+    else
+      render json: { errors: rating.errors.full_messages }, status: :unprocessable_entity
+    end
   end
 
   private

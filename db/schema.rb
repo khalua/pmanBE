@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_19_015841) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_19_022932) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -104,6 +104,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_015841) do
     t.bigint "vendor_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "is_active", default: true, null: false
     t.index ["user_id", "vendor_id"], name: "index_property_manager_vendors_on_user_id_and_vendor_id", unique: true
     t.index ["user_id"], name: "index_property_manager_vendors_on_user_id"
     t.index ["vendor_id"], name: "index_property_manager_vendors_on_vendor_id"
@@ -186,6 +187,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_015841) do
     t.index ["unit_id"], name: "index_users_on_unit_id"
   end
 
+  create_table "vendor_ratings", force: :cascade do |t|
+    t.bigint "vendor_id", null: false
+    t.bigint "maintenance_request_id", null: false
+    t.bigint "tenant_id", null: false
+    t.integer "stars", null: false
+    t.text "comment"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["maintenance_request_id"], name: "index_vendor_ratings_on_maintenance_request_id"
+    t.index ["tenant_id"], name: "index_vendor_ratings_on_tenant_id"
+    t.index ["vendor_id", "maintenance_request_id"], name: "index_vendor_ratings_on_vendor_id_and_maintenance_request_id", unique: true
+    t.index ["vendor_id"], name: "index_vendor_ratings_on_vendor_id"
+  end
+
   create_table "vendors", force: :cascade do |t|
     t.string "name"
     t.string "phone_number"
@@ -196,6 +211,14 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_015841) do
     t.text "specialties"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "contact_name"
+    t.string "cell_phone"
+    t.string "email"
+    t.string "address"
+    t.string "website"
+    t.text "notes"
+    t.bigint "owner_user_id"
+    t.index ["owner_user_id"], name: "index_vendors_on_owner_user_id"
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
@@ -218,4 +241,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_015841) do
   add_foreign_key "tenant_invitations", "users", column: "created_by_id"
   add_foreign_key "units", "properties"
   add_foreign_key "users", "units"
+  add_foreign_key "vendor_ratings", "maintenance_requests"
+  add_foreign_key "vendor_ratings", "users", column: "tenant_id"
+  add_foreign_key "vendor_ratings", "vendors"
+  add_foreign_key "vendors", "users", column: "owner_user_id"
 end

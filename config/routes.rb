@@ -37,7 +37,11 @@ Rails.application.routes.draw do
           post :activate
         end
       end
-      resources :vendors, only: [ :index, :create, :destroy ]
+      resources :vendors, only: [ :index, :new, :create, :edit, :update, :destroy, :show ] do
+        member do
+          patch :toggle_active
+        end
+      end
       resources :properties, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
         resources :units, only: [ :new, :create, :edit, :update, :destroy ]
         resources :invitations, only: [ :index, :create ] do
@@ -89,6 +93,7 @@ Rails.application.routes.draw do
         post :assign_vendor
         post :close
         post :mark_complete
+        post :rate_vendor
       end
       resources :notes, only: [ :index, :create ], controller: "maintenance_requests/notes"
     end
@@ -114,7 +119,11 @@ Rails.application.routes.draw do
     post "phone/verify/confirm", to: "phone_verifications#confirm"
 
     namespace :manager do
-      resources :vendors, only: [ :index, :show, :create, :destroy ]
+      resources :vendors, only: [ :index, :show, :create, :update, :destroy ] do
+        member do
+          patch :toggle_active
+        end
+      end
       resources :maintenance_requests, only: [] do
         resources :quote_requests, only: [ :index, :create ]
       end

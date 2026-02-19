@@ -8,6 +8,8 @@ class User < ApplicationRecord
   has_many :device_tokens, dependent: :destroy
   has_many :property_manager_vendors, dependent: :destroy
   has_many :vendors, through: :property_manager_vendors
+  has_many :active_vendors, -> { joins(:property_manager_vendors).where(property_manager_vendors: { is_active: true }) }, through: :property_manager_vendors, source: :vendor
+  has_many :owned_vendors, class_name: "Vendor", foreign_key: :owner_user_id, dependent: :destroy
   has_many :tenant_invitations, foreign_key: :created_by_id, dependent: :destroy
   has_many :phone_verifications, dependent: :destroy
 

@@ -3,7 +3,7 @@ require "rails_helper"
 RSpec.describe Vendor, type: :model do
   describe "validations" do
     it { is_expected.to validate_presence_of(:name) }
-    it { is_expected.to validate_presence_of(:phone_number) }
+    it { is_expected.to validate_presence_of(:cell_phone) }
     it { is_expected.to validate_presence_of(:vendor_type) }
   end
 
