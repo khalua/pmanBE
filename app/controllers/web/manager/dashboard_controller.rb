@@ -12,6 +12,7 @@ class Web::Manager::DashboardController < WebController
       .includes(tenant: { unit: :property }, assigned_vendor: {})
       .order(created_at: :desc)
     @vendors_count = current_user.vendors.count
+    @open_requests_count = @maintenance_requests.count { |r| !%w[completed closed].include?(r.status) }
   end
 
   private

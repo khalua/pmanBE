@@ -26,6 +26,16 @@
     <div class="bg-white rounded-lg shadow p-4">
       <p class="text-sm font-medium text-gray-500">Units</p>
       <p class="mt-1 text-lg font-semibold text-gray-900"><%= @units.size %></p>
+      <% occupied_count = @units.count { |u| u.current_tenants.any? } %>
+      <% vacant_count = @units.size - occupied_count %>
+      <% if @units.any? %>
+        <div class="mt-2 flex gap-2 flex-wrap">
+          <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800"><%= occupied_count %> occupied</span>
+          <% if vacant_count > 0 %>
+            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800"><%= vacant_count %> vacant</span>
+          <% end %>
+        </div>
+      <% end %>
     </div>
   </div>
 
