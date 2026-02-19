@@ -5,6 +5,13 @@ class UserMailer < ApplicationMailer
     mail(to: user.email, subject: "Reset your Prompt password")
   end
 
+  def manager_invitation(invitation)
+    @invitation = invitation
+    @register_url = register_url(manager_invite_code: invitation.code)
+    @admin = invitation.created_by
+    mail(to: invitation.manager_email, subject: "You've been invited to join Prompt as a Property Manager")
+  end
+
   def tenant_invitation(invitation)
     @invitation = invitation
     @register_url = register_url(invite_code: invitation.code)

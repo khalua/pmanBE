@@ -4,24 +4,36 @@
   <div class="max-w-md w-full space-y-8">
     <div class="text-center">
       <h2 class="text-3xl font-bold text-gray-900">Welcome to Prompt!</h2>
-      <p class="mt-2 text-sm text-gray-600">
-        You've been invited to join <strong><%= @invitation.unit.property.name.presence || @invitation.unit.property.address %></strong> — Unit <strong><%= @invitation.unit.identifier %></strong>.
-      </p>
+      <% if @manager_invitation %>
+        <p class="mt-2 text-sm text-gray-600">
+          You've been invited to join Prompt as a <strong>Property Manager</strong>.
+        </p>
+      <% else %>
+        <p class="mt-2 text-sm text-gray-600">
+          You've been invited to join <strong><%= @invitation.unit.property.name.presence || @invitation.unit.property.address %></strong> — Unit <strong><%= @invitation.unit.identifier %></strong>.
+        </p>
+      <% end %>
       <p class="mt-1 text-sm text-gray-600">Set up your password to get started.</p>
     </div>
 
     <%= form_with url: register_path, method: :post, class: "mt-8 space-y-6" do |f| %>
-      <input type="hidden" name="invite_code" value="<%= @invitation.code %>">
+      <% if @manager_invitation %>
+        <input type="hidden" name="manager_invite_code" value="<%= @manager_invitation.code %>">
+      <% else %>
+        <input type="hidden" name="invite_code" value="<%= @invitation.code %>">
+      <% end %>
 
       <div class="space-y-4">
         <div>
           <%= f.label :name, class: "block text-sm font-medium text-gray-700" %>
-          <%= f.text_field :name, value: @invitation.tenant_name, required: true, autofocus: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
+          <% invite_name = @manager_invitation ? @manager_invitation.manager_name : @invitation.tenant_name %>
+          <%= f.text_field :name, value: invite_name, required: true, autofocus: true, class: "mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-3 py-2 border" %>
         </div>
 
         <div>
           <%= f.label :email, class: "block text-sm font-medium text-gray-700" %>
-          <input type="email" value="<%= @invitation.tenant_email %>" disabled class="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm px-3 py-2 border text-gray-500 cursor-not-allowed">
+          <% invite_email = @manager_invitation ? @manager_invitation.manager_email : @invitation.tenant_email %>
+          <input type="email" value="<%= invite_email %>" disabled class="mt-1 block w-full rounded-md bg-gray-100 border-gray-300 shadow-sm px-3 py-2 border text-gray-500 cursor-not-allowed">
         </div>
 
         <div>

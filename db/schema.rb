@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_19_022932) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_19_162027) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -76,6 +76,21 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_022932) do
     t.jsonb "chat_history", default: []
     t.index ["assigned_vendor_id"], name: "index_maintenance_requests_on_assigned_vendor_id"
     t.index ["tenant_id"], name: "index_maintenance_requests_on_tenant_id"
+  end
+
+  create_table "manager_invitations", force: :cascade do |t|
+    t.bigint "created_by_id"
+    t.bigint "claimed_by_id"
+    t.string "manager_name"
+    t.string "manager_email"
+    t.string "code"
+    t.datetime "expires_at"
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["claimed_by_id"], name: "index_manager_invitations_on_claimed_by_id"
+    t.index ["code"], name: "index_manager_invitations_on_code", unique: true
+    t.index ["created_by_id"], name: "index_manager_invitations_on_created_by_id"
   end
 
   create_table "phone_verifications", force: :cascade do |t|

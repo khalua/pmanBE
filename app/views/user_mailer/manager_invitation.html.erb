@@ -1,0 +1,17 @@
+<h1>Welcome to Prompt!</h1>
+
+<p>Hi <%= @invitation.manager_name %>,</p>
+
+<p><%= @admin.name %> has invited you to join <strong>Prompt</strong> as a <strong>Property Manager</strong>.</p>
+
+<p>To get started, create your account using the link below:</p>
+
+<p><%= link_to "Create Your Account", @register_url %></p>
+
+<p>Your invitation code is: <strong><%= @invitation.code %></strong></p>
+
+<p>When registering, make sure to use this email address (<%= @invitation.manager_email %>) as it's linked to your invitation.</p>
+
+<p>This invitation expires on <%= @invitation.expires_at.strftime("%B %d, %Y") %>.</p>
+
+<p>If you have any questions, reach out to your administrator.</p>

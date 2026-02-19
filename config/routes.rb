@@ -75,6 +75,11 @@ Rails.application.routes.draw do
         resources :units, only: [ :new, :create, :edit, :update, :destroy ]
       end
       resources :maintenance_requests, only: [ :index, :show, :destroy ]
+      resources :manager_invitations, only: [ :index, :create ] do
+        member do
+          post :revoke
+        end
+      end
     end
   end
 
