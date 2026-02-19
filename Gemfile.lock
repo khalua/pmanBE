@@ -76,7 +76,7 @@ GEM
       tzinfo (~> 2.0, >= 2.0.5)
     addressable (2.8.8)
       public_suffix (>= 2.0.2, < 8.0)
-    anthropic (1.19.0)
+    anthropic (1.22.0)
       cgi
       connection_pool
     ast (2.4.3)
