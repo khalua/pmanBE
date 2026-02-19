@@ -18,7 +18,7 @@ class VendorPortalController < ApplicationController
         issueType: maintenance_request.issue_type,
         location: maintenance_request.location,
         severity: maintenance_request.severity,
-        address: maintenance_request.tenant&.address || "Address not available",
+        address: maintenance_request.tenant&.unit&.property&.address || maintenance_request.tenant&.address || "Address not available",
         tenantContact: "#{maintenance_request.tenant&.name} - #{maintenance_request.tenant&.phone}",
         reportedTime: maintenance_request.created_at.strftime("%B %d, %Y at %I:%M %p")
       }
@@ -44,7 +44,7 @@ class VendorPortalController < ApplicationController
       .sub("tenantContact: 'John Doe - (555) 123-4567'", "tenantContact: '#{request_data[:tenantContact]}'")
       .sub("reportedTime: 'Today at 2:30 PM'", "reportedTime: '#{request_data[:reportedTime]}'")
 
-    # Inject photos if available
+    # Inject photos if available, otherwise hide the section entirely
     if maintenance_request&.images&.attached?
       photo_elements = maintenance_request.images.map.with_index do |image, index|
         url = Rails.application.routes.url_helpers.rails_blob_path(image, only_path: true)
@@ -54,6 +54,11 @@ class VendorPortalController < ApplicationController
       modified_html = modified_html.sub(
         /<div class="photo-grid">[\s\S]*?<\/div>/,
         "<div class=\"photo-grid\">#{photo_elements}</div>"
+      )
+    else
+      modified_html = modified_html.sub(
+        /<div class="photos">[\s\S]*?<\/div>\s*<\/div>/,
+        ""
       )
     end
 

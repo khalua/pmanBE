@@ -12,8 +12,8 @@ class QuoteRequestNotifier
   def call
     return unless @vendor.cell_phone.present?
 
-    base_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
-    link = "#{base_url}/quote?token=#{@qr.token}"
+    opts = Rails.application.config.action_mailer.default_url_options || { host: "localhost", port: 3000 }
+    link = Rails.application.routes.url_helpers.quote_url(token: @qr.token, **opts)
 
     body = "New maintenance request:\n" \
            "Issue: #{@mr.issue_type}\n" \
