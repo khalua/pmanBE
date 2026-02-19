@@ -187,7 +187,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
       },
       assigned_vendor: r.assigned_vendor ? { id: r.assigned_vendor.id, name: r.assigned_vendor.name, phone_number: r.assigned_vendor.phone_number, rating: r.assigned_vendor.rating.to_f, is_available: r.assigned_vendor.is_available, location: r.assigned_vendor.location, vendor_type: r.assigned_vendor.vendor_type, specialties: r.assigned_vendor.specialties } : nil,
       image_urls: r.images.map { |img| rails_blob_url(img, disposition: "inline") },
-      quotes: r.quotes.map { |q| { id: q.id, estimated_cost: q.estimated_cost.to_f, work_description: q.work_description, estimated_arrival_time: q.estimated_arrival_time } },
+      quotes: r.quotes.includes(:vendor).map { |q| { id: q.id, vendor_id: q.vendor_id, vendor_name: q.vendor&.name, vendor_rating: q.vendor&.rating.to_f, estimated_cost: q.estimated_cost.to_f, work_description: q.work_description, estimated_arrival_time: q.estimated_arrival_time, created_at: q.created_at } },
       notes: r.notes.order(created_at: :asc).map { |n| { id: n.id, content: n.content, user: { id: n.user.id, name: n.user.name, role: n.user.role }, created_at: n.created_at } },
       chat_history: r.chat_history.reject { |m| m["role"] == "system" || m["content"]&.match?(/\AREADY_FOR_(PHOTOS|SUBMISSION)\z/) }.presence,
       created_at: r.created_at,

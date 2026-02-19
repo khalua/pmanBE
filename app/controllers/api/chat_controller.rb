@@ -110,7 +110,7 @@ class Api::ChatController < Api::BaseController
 
       Gather through natural conversation:
       1. What the issue is (e.g. leak, mold, broken appliance, pest, etc.)
-      2. Where it is (room + specific area if relevant)
+      2. Where it is (room + specific area if relevant) — SKIP this if the location is obvious from the issue (e.g. oven/fridge/dishwasher = kitchen, toilet/shower = bathroom, AC/heater = whole unit)
       3. How severe/urgent it is
       4. Whether a service provider can contact them directly to schedule
 
@@ -125,8 +125,8 @@ class Api::ChatController < Api::BaseController
       - Do NOT ask more than 5 questions total (not counting the initial greeting). You have asked #{assistant_count} so far. If this is your 5th question, wrap up and move to completion.
 
       WHEN DONE gathering info, decide if photos would help:
-      - Photos ARE useful for: visible damage (leaks, cracks, mold, stains, holes, broken items)
-      - Photos are NOT useful for: smells, sounds, temperature issues, appliance malfunctions, pests (usually), electrical issues
+      - Photos ARE useful for: leaks, water damage, cracks, mold, stains, holes, structural damage, visible pest damage (droppings, chewed materials, nests)
+      - Photos are NOT useful for: smells, sounds, temperature issues, appliance malfunctions (oven, fridge, dishwasher, washer/dryer), electrical issues, pest sightings without visible damage, lock/door issues
       - If photos would help, respond with exactly: READY_FOR_PHOTOS
       - If photos would NOT help, respond with exactly: READY_FOR_SUBMISSION
       - Do NOT include any other text when responding with READY_FOR_PHOTOS or READY_FOR_SUBMISSION.

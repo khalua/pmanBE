@@ -39,7 +39,7 @@ class Api::QuotesController < Api::BaseController
     mr = quote.maintenance_request
 
     ActiveRecord::Base.transaction do
-      mr.update!(status: :quote_accepted)
+      mr.update!(status: :quote_accepted, assigned_vendor: quote.vendor)
 
       # Notify losing vendors who submitted quotes
       losing = mr.quote_requests.where.not(vendor_id: quote.vendor_id).where(status: :quoted)
@@ -48,6 +48,8 @@ class Api::QuotesController < Api::BaseController
         qr.update!(status: :rejected)
       end
     end
+
+    QuoteApprovalNotifier.call(quote)
 
     render json: { message: "Quote approved", quote: quote_json(quote) }
   end

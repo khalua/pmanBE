@@ -17,26 +17,9 @@ class Web::Manager::QuotesController < WebController
       end
     end
 
-    redirect_to select_message_web_manager_quote_path(@quote)
-  end
+    QuoteApprovalNotifier.call(@quote)
 
-  def select_message
-    # @quote is already set by before_action
-    # Renders a view with two buttons for message selection
-  end
-
-  def send_approval_message
-    message_type = params[:message_type]
-
-    unless %w[contact_tenant manager_will_contact].include?(message_type)
-      redirect_to web_manager_maintenance_request_path(@quote.maintenance_request),
-                  alert: "Invalid message type."
-      return
-    end
-
-    QuoteApprovalNotifier.call(@quote, message_type: message_type)
-
-    redirect_to web_manager_maintenance_request_path(@quote.maintenance_request),
+    redirect_to web_manager_maintenance_request_path(mr),
                 notice: "Quote approved and vendor notified."
   end
 

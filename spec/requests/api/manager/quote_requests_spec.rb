@@ -35,6 +35,37 @@ RSpec.describe "Api::Manager::QuoteRequests", type: :request do
       statuses = QuoteRequest.where(maintenance_request: mr).pluck(:status)
       expect(statuses).to all(eq("sent"))
     end
+
+    it "rejects quote requests when status is quote_accepted" do
+      mr.update!(status: :quote_accepted)
+      vendors = create_list(:vendor, 1)
+      post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
+           params: { vendor_ids: vendors.map(&:id) },
+           headers: auth_headers(manager)
+
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)["error"]).to include("Cannot request quotes")
+    end
+
+    it "allows additional quote requests when status is vendor_quote_requested" do
+      mr.update!(status: :vendor_quote_requested)
+      vendors = create_list(:vendor, 1)
+      post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
+           params: { vendor_ids: vendors.map(&:id) },
+           headers: auth_headers(manager)
+
+      expect(response).to have_http_status(:created)
+    end
+
+    it "allows additional quote requests when status is quote_received" do
+      mr.update!(status: :quote_received)
+      vendors = create_list(:vendor, 1)
+      post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
+           params: { vendor_ids: vendors.map(&:id) },
+           headers: auth_headers(manager)
+
+      expect(response).to have_http_status(:created)
+    end
   end
 
   describe "GET /api/manager/maintenance_requests/:id/quote_requests" do

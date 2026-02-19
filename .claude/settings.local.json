@@ -37,7 +37,10 @@
       "Bash(lsof:*)",
       "Bash(ipconfig getifaddr:*)",
       "Bash(kill:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "mcp__claude_ai_Figma__get_figjam",
+      "mcp__claude_ai_Figma__generate_diagram",
+      "Bash(bundle exec rails test:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

@@ -8,6 +8,11 @@ class Api::Manager::QuoteRequestsController < Api::Manager::BaseController
 
   def create
     mr = find_maintenance_request
+
+    if mr.quote_accepted? || mr.in_progress? || mr.completed? || mr.closed?
+      return render json: { error: "Cannot request quotes after a quote has been accepted" }, status: :unprocessable_entity
+    end
+
     vendor_ids = Array(params[:vendor_ids])
 
     created = vendor_ids.filter_map do |vid|

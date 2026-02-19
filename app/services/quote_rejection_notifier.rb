@@ -18,7 +18,7 @@ class QuoteRejectionNotifier
            "We'll keep you in mind for future opportunities.\n\n" \
            "Best regards"
 
-    SmsService.send_message(to: @vendor.phone_number, body: body)
+    VendorNotificationMailer.sms_simulation(@vendor.name, body).deliver_later
 
     PushNotificationService.notify(
       user: @mr.tenant,

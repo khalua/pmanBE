@@ -1,19 +1,13 @@
 class VendorPortalController < ApplicationController
   def show
-    if params[:token].present?
-      quote_request = QuoteRequest.find_by!(token: params[:token])
-      request_id = quote_request.maintenance_request_id
-      vendor_id = quote_request.vendor_id
-    else
-      request_id = params[:id]
-      vendor_id = nil
+    unless params[:token].present?
+      return render plain: "A valid token is required to access this page.", status: :bad_request
     end
 
+    quote_request = QuoteRequest.find_by!(token: params[:token])
+    request_id = quote_request.maintenance_request_id
+    vendor_id = quote_request.vendor_id
     is_approved = params[:approved] == "true"
-
-    unless request_id
-      return render plain: "Request ID is required", status: :bad_request
-    end
 
     html_path = Rails.root.join("public", "service-vendor-portal.html")
     html = File.read(html_path)

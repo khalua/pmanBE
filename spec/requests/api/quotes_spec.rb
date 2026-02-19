@@ -46,6 +46,21 @@ RSpec.describe "Api::Quotes", type: :request do
       expect(response).to have_http_status(:ok)
       expect(mr.reload.status).to eq("quote_accepted")
     end
+
+    it "assigns the vendor to the maintenance request" do
+      other_vendor = create(:vendor)
+      quote = create(:quote, maintenance_request: mr, vendor: other_vendor)
+      post "/api/quotes/#{quote.id}/approve", headers: auth_headers(user)
+      expect(mr.reload.assigned_vendor).to eq(other_vendor)
+    end
+
+    it "sends approval notification to vendor and tenant" do
+      quote = create(:quote, maintenance_request: mr, vendor: vendor)
+      allow(PushNotificationService).to receive(:notify)
+      expect {
+        post "/api/quotes/#{quote.id}/approve", headers: auth_headers(user)
+      }.to have_enqueued_mail(VendorNotificationMailer, :sms_simulation)
+    end
   end
 
   describe "POST /api/quotes/:id/reject" do
