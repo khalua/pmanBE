@@ -87,8 +87,94 @@ RSpec.describe "Api::Chat", type: :request do
       expect(json["extractedInfo"]["location"]).to eq("bathroom")
     end
 
-    it "forces READY_FOR_SUBMISSION after 5 assistant messages" do
-      messages = 5.times.flat_map do |i|
+    it "returns READY_FOR_PHOTOS when issue type suggests visible damage" do
+      allow(messages_api).to receive(:create).and_return(
+        double(content: [double(text: "READY_FOR_PHOTOS\nEXTRACTED_INFO:{\"issueType\":\"leak\",\"location\":\"kitchen\",\"severity\":\"moderate\",\"contactPreference\":\"yes\"}")])
+      )
+
+      post "/api/chat", params: {
+        messages: [{ role: "user", content: "kitchen sink is leaking" }],
+        extractedInfo: {}
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_PHOTOS")
+      expect(json["extractedInfo"]["issueType"]).to eq("leak")
+    end
+
+    it "returns READY_FOR_PHOTOS for mold damage" do
+      allow(messages_api).to receive(:create).and_return(
+        double(content: [double(text: "READY_FOR_PHOTOS\nEXTRACTED_INFO:{\"issueType\":\"mold\",\"location\":\"bathroom\",\"severity\":\"urgent\",\"contactPreference\":\"\"}")])
+      )
+
+      post "/api/chat", params: {
+        messages: [{ role: "user", content: "there's mold in the bathroom" }],
+        extractedInfo: {}
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_PHOTOS")
+      expect(json["extractedInfo"]["issueType"]).to eq("mold")
+    end
+
+    it "returns READY_FOR_PHOTOS for crack damage" do
+      allow(messages_api).to receive(:create).and_return(
+        double(content: [double(text: "READY_FOR_PHOTOS\nEXTRACTED_INFO:{\"issueType\":\"crack\",\"location\":\"wall\",\"severity\":\"moderate\",\"contactPreference\":\"\"}")])
+      )
+
+      post "/api/chat", params: {
+        messages: [{ role: "user", content: "there's a crack in the wall" }],
+        extractedInfo: {}
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_PHOTOS")
+    end
+
+    it "returns READY_FOR_PHOTOS for broken items" do
+      allow(messages_api).to receive(:create).and_return(
+        double(content: [double(text: "READY_FOR_PHOTOS\nEXTRACTED_INFO:{\"issueType\":\"broken\",\"location\":\"bedroom\",\"severity\":\"low\",\"contactPreference\":\"\"}")])
+      )
+
+      post "/api/chat", params: {
+        messages: [{ role: "user", content: "window blind is broken" }],
+        extractedInfo: {}
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_PHOTOS")
+    end
+
+    it "returns READY_FOR_SUBMISSION for non-visual issues" do
+      allow(messages_api).to receive(:create).and_return(
+        double(content: [double(text: "READY_FOR_SUBMISSION\nEXTRACTED_INFO:{\"issueType\":\"electrical\",\"location\":\"kitchen\",\"severity\":\"urgent\",\"contactPreference\":\"yes\"}")])
+      )
+
+      post "/api/chat", params: {
+        messages: [{ role: "user", content: "outlets not working" }],
+        extractedInfo: {}
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_SUBMISSION")
+    end
+
+    it "returns READY_FOR_SUBMISSION for temperature issues" do
+      allow(messages_api).to receive(:create).and_return(
+        double(content: [double(text: "READY_FOR_SUBMISSION\nEXTRACTED_INFO:{\"issueType\":\"heating\",\"location\":\"bedroom\",\"severity\":\"urgent\",\"contactPreference\":\"\"}")])
+      )
+
+      post "/api/chat", params: {
+        messages: [{ role: "user", content: "it's too cold in my bedroom" }],
+        extractedInfo: {}
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_SUBMISSION")
+    end
+
+    it "forces READY_FOR_SUBMISSION after 6 assistant messages" do
+      messages = 6.times.flat_map do |i|
         [
           { role: "user", content: "message #{i}" },
           { role: "assistant", content: "reply #{i}" }
@@ -97,17 +183,35 @@ RSpec.describe "Api::Chat", type: :request do
 
       post "/api/chat", params: {
         messages: messages,
-        extractedInfo: { issueType: "leak", location: "kitchen" }
+        extractedInfo: { issueType: "electrical", location: "kitchen" }
       }, as: :json
 
       json = JSON.parse(response.body)
       expect(json["response"]).to eq("READY_FOR_SUBMISSION")
-      expect(json["extractedInfo"]["issueType"]).to eq("leak")
+      expect(json["extractedInfo"]["issueType"]).to eq("electrical")
       expect(json["extractedInfo"]["severity"]).to eq("moderate")
     end
 
+    it "forces READY_FOR_PHOTOS after 6 assistant messages if visual damage detected" do
+      messages = 6.times.flat_map do |i|
+        [
+          { role: "user", content: "message #{i}" },
+          { role: "assistant", content: "reply #{i}" }
+        ]
+      end
+
+      post "/api/chat", params: {
+        messages: messages,
+        extractedInfo: { issueType: "water damage", location: "basement" }
+      }, as: :json
+
+      json = JSON.parse(response.body)
+      expect(json["response"]).to eq("READY_FOR_PHOTOS")
+      expect(json["extractedInfo"]["issueType"]).to eq("water damage")
+    end
+
     it "fills in defaults on safety cutoff" do
-      messages = 5.times.flat_map do |i|
+      messages = 6.times.flat_map do |i|
         [{ role: "user", content: "msg" }, { role: "assistant", content: "reply" }]
       end
 
