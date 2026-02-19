@@ -43,6 +43,7 @@ gem "stimulus-rails"
 gem "omniauth-google-oauth2"
 gem "omniauth-rails_csrf_protection"
 
+gem "resend"
 gem "twilio-ruby"
 gem "fcm", "~> 2.0"
 gem "aws-sdk-s3", require: false
