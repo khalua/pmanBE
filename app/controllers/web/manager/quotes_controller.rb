@@ -4,7 +4,19 @@ class Web::Manager::QuotesController < WebController
   before_action :set_quote
 
   def approve
-    @quote.maintenance_request.update!(status: :quote_accepted, assigned_vendor: @quote.vendor)
+    mr = @quote.maintenance_request
+
+    ActiveRecord::Base.transaction do
+      mr.update!(status: :quote_accepted, assigned_vendor: @quote.vendor)
+
+      # Notify losing vendors who submitted quotes
+      losing = mr.quote_requests.where.not(vendor_id: @quote.vendor_id).where(status: :quoted)
+      losing.each do |qr|
+        QuoteLoserNotifier.call(qr)
+        qr.update!(status: :rejected)
+      end
+    end
+
     redirect_to select_message_web_manager_quote_path(@quote)
   end
 
