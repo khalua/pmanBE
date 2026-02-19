@@ -10,7 +10,7 @@ class QuoteRequestNotifier
   end
 
   def call
-    return unless @vendor.phone_number.present?
+    return unless @vendor.cell_phone.present?
 
     base_url = ENV.fetch("FRONTEND_URL", "http://localhost:3000")
     link = "#{base_url}/quote?token=#{@qr.token}"

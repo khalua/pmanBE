@@ -28,7 +28,12 @@ class Api::Manager::QuoteRequestsController < Api::Manager::BaseController
       end
     end
 
-    render json: created.map { |qr| quote_request_json(qr) }, status: :created
+    count = created.size
+    render json: {
+      quote_requests: created.map { |qr| quote_request_json(qr) },
+      message: "#{count} quote #{"request".pluralize(count)} sent. I'll notify you as quotes come in.",
+      count: count
+    }, status: :created
   end
 
   private

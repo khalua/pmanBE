@@ -11,7 +11,7 @@ class QuoteApprovalNotifier
   end
 
   def call
-    notify_vendor if @vendor&.phone_number.present?
+    notify_vendor if @vendor&.cell_phone.present?
     notify_tenant
   end
 

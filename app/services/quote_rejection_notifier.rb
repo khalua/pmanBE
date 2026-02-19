@@ -10,7 +10,7 @@ class QuoteRejectionNotifier
   end
 
   def call
-    return unless @vendor&.phone_number.present?
+    return unless @vendor&.cell_phone.present?
 
     body = "Hi #{@vendor.name},\n\n" \
            "Thank you for submitting a quote for our #{@mr.issue_type} maintenance request.\n\n" \

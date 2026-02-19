@@ -13,7 +13,7 @@ RSpec.describe "Api::Manager::QuoteRequests", type: :request do
 
       expect(response).to have_http_status(:created)
       body = JSON.parse(response.body)
-      expect(body.size).to eq(2)
+      expect(body["quote_requests"].size).to eq(2)
       expect(mr.reload.status).to eq("vendor_quote_requested")
     end
 

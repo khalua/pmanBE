@@ -2,7 +2,7 @@ require "rails_helper"
 
 RSpec.describe QuoteLoserNotifier do
   describe ".call" do
-    let(:vendor) { create(:vendor, phone_number: "+15551234567") }
+    let(:vendor) { create(:vendor, cell_phone: "+15551234567") }
     let(:mr) { create(:maintenance_request) }
     let(:quote_request) { create(:quote_request, maintenance_request: mr, vendor: vendor) }
 
@@ -14,7 +14,7 @@ RSpec.describe QuoteLoserNotifier do
     end
 
     it "does not send email if vendor has no phone number" do
-      vendor.update!(phone_number: nil)
+      vendor.update_column(:cell_phone, nil)
       expect {
         QuoteLoserNotifier.call(quote_request)
       }.not_to have_enqueued_mail(VendorNotificationMailer, :sms_simulation)

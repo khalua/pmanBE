@@ -48,7 +48,7 @@
             </td>
             <td class="px-4 py-3 text-sm text-blue-600">
               <% if vendor.cell_phone.present? %>
-                <a href="tel:<%= vendor.cell_phone %>"><%= vendor.cell_phone %></a>
+                <a href="tel:<%= vendor.cell_phone %>"><%= format_phone(vendor.cell_phone) %></a>
               <% else %>
                 —
               <% end %>

@@ -156,12 +156,15 @@
         <dt class="text-sm font-medium text-gray-500">Assigned Vendor</dt>
         <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.assigned_vendor&.name || "None" %></dd>
       </div>
-      <div class="sm:col-span-2">
-        <dt class="text-sm font-medium text-gray-500">Summary</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.conversation_summary %></dd>
-      </div>
     </dl>
   </div>
+
+  <% if @maintenance_request.conversation_summary.present? %>
+    <div class="mt-6 bg-white shadow rounded-lg p-6">
+      <h2 class="text-lg font-semibold text-gray-900 mb-2">Summary of Initial Request</h2>
+      <p class="text-sm text-gray-700 whitespace-pre-wrap"><%= @maintenance_request.conversation_summary %></p>
+    </div>
+  <% end %>
 
   <% filtered_chat = @maintenance_request.chat_history.reject { |m| m['role'] == 'system' || m['content']&.match?(/\AREADY_FOR_(PHOTOS|SUBMISSION)\z/) } %>
   <% if filtered_chat.present? %>

@@ -10,7 +10,7 @@ class QuoteLoserNotifier
   end
 
   def call
-    return unless @vendor&.phone_number.present?
+    return unless @vendor&.cell_phone.present?
 
     body = "Thank you for submitting a quote for the #{@mr.issue_type} job. " \
            "We've decided to go with another vendor this time, but we appreciate " \

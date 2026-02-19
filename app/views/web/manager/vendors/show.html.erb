@@ -66,13 +66,13 @@
         <div>
           <dt class="text-gray-500">Cell Phone <span class="text-xs text-blue-500">(SMS)</span></dt>
           <dd class="font-medium text-blue-600">
-            <a href="tel:<%= @vendor.cell_phone %>"><%= @vendor.cell_phone.presence || "—" %></a>
+            <a href="tel:<%= @vendor.cell_phone %>"><%= format_phone(@vendor.cell_phone).presence || "—" %></a>
           </dd>
         </div>
         <% if @vendor.phone_number.present? %>
           <div>
             <dt class="text-gray-500">Office Phone</dt>
-            <dd class="font-medium text-gray-900"><a href="tel:<%= @vendor.phone_number %>"><%= @vendor.phone_number %></a></dd>
+            <dd class="font-medium text-gray-900"><a href="tel:<%= @vendor.phone_number %>"><%= format_phone(@vendor.phone_number) %></a></dd>
           </div>
         <% end %>
         <% if @vendor.email.present? %>
