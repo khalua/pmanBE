@@ -6,27 +6,26 @@ RSpec.describe QuoteLoserNotifier do
     let(:mr) { create(:maintenance_request) }
     let(:quote_request) { create(:quote_request, maintenance_request: mr, vendor: vendor) }
 
-    it "sends SMS to vendor who submitted a quote but wasn't selected" do
-      expect(SmsService).to receive(:send_message).with(
-        to: vendor.phone_number,
-        body: a_string_including("Thank you for submitting a quote", "another vendor", "hope to work with you")
-      )
-      QuoteLoserNotifier.call(quote_request)
+    it "sends email to tony.contreras@gmail.com with vendor quote rejection" do
+      expect {
+        QuoteLoserNotifier.call(quote_request)
+      }.to have_enqueued_mail(VendorNotificationMailer, :sms_simulation)
+        .with(vendor.name, a_string_including("Thank you for submitting a quote", "another vendor", "hope to work with you"))
     end
 
-    it "does not send SMS if vendor has no phone number" do
+    it "does not send email if vendor has no phone number" do
       vendor.update!(phone_number: nil)
-      expect(SmsService).not_to receive(:send_message)
-      QuoteLoserNotifier.call(quote_request)
+      expect {
+        QuoteLoserNotifier.call(quote_request)
+      }.not_to have_enqueued_mail(VendorNotificationMailer, :sms_simulation)
     end
 
-    it "includes issue type in SMS" do
+    it "includes issue type in email" do
       mr.update!(issue_type: "kitchen sink leak")
-      expect(SmsService).to receive(:send_message).with(
-        to: vendor.phone_number,
-        body: a_string_including("kitchen sink leak")
-      )
-      QuoteLoserNotifier.call(quote_request)
+      expect {
+        QuoteLoserNotifier.call(quote_request)
+      }.to have_enqueued_mail(VendorNotificationMailer, :sms_simulation)
+        .with(vendor.name, a_string_including("kitchen sink leak"))
     end
   end
 end

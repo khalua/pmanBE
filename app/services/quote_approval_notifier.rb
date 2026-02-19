@@ -23,7 +23,7 @@ class QuoteApprovalNotifier
              raise ArgumentError, "Invalid message_type: #{@message_type}"
            end
 
-    SmsService.send_message(to: @vendor.phone_number, body: body)
+    VendorNotificationMailer.sms_simulation(@vendor.name, body).deliver_later
 
     PushNotificationService.notify(
       user: @tenant,

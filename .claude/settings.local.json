@@ -35,7 +35,9 @@
       "Bash(/Users/tony/Documents/Code/pmanBE/app/controllers/api/manager/vendors_controller.rb:*)",
       "Bash(/Users/tony/Documents/Code/pmanBE/spec/factories/vendors.rb:*)",
       "Bash(lsof:*)",
-      "Bash(ipconfig getifaddr:*)"
+      "Bash(ipconfig getifaddr:*)",
+      "Bash(kill:*)",
+      "Bash(git add:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

@@ -16,6 +16,6 @@ class QuoteLoserNotifier
            "We've decided to go with another vendor this time, but we appreciate " \
            "your time and hope to work with you in the future."
 
-    SmsService.send_message(to: @vendor.phone_number, body: body)
+    VendorNotificationMailer.sms_simulation(@vendor.name, body).deliver_later
   end
 end

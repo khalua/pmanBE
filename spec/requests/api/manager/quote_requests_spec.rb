@@ -6,7 +6,6 @@ RSpec.describe "Api::Manager::QuoteRequests", type: :request do
 
   describe "POST /api/manager/maintenance_requests/:id/quote_requests" do
     it "creates quote requests for given vendors" do
-      allow(SmsService).to receive(:send_message)
       vendors = create_list(:vendor, 2)
       post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
            params: { vendor_ids: vendors.map(&:id) },
@@ -19,15 +18,15 @@ RSpec.describe "Api::Manager::QuoteRequests", type: :request do
     end
 
     it "sends SMS to each vendor" do
-      expect(SmsService).to receive(:send_message).twice
       vendors = create_list(:vendor, 2)
-      post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
-           params: { vendor_ids: vendors.map(&:id) },
-           headers: auth_headers(manager)
+      expect {
+        post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
+             params: { vendor_ids: vendors.map(&:id) },
+             headers: auth_headers(manager)
+      }.to have_enqueued_mail(VendorNotificationMailer, :sms_simulation).at_least(2).times
     end
 
     it "marks quote requests as sent" do
-      allow(SmsService).to receive(:send_message)
       vendors = create_list(:vendor, 2)
       post "/api/manager/maintenance_requests/#{mr.id}/quote_requests",
            params: { vendor_ids: vendors.map(&:id) },

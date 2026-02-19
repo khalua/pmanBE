@@ -112,6 +112,7 @@ Rails.application.routes.draw do
 
     post "chat", to: "chat#chat"
     post "summarize", to: "chat#summarize"
+    post "support_chat", to: "chat#support_chat"
 
     post "reset", to: "reset#create"
 
