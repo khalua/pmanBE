@@ -4,6 +4,7 @@ class Api::Manager::VendorsController < Api::Manager::BaseController
       .joins(:property_manager_vendors)
       .where(property_manager_vendors: { user_id: current_user.id })
       .select("vendors.*, property_manager_vendors.is_active AS pmv_is_active")
+      .order("vendors.name ASC")
     render json: vendors.map { |v| vendor_json(v) }
   end
 
@@ -12,12 +13,26 @@ class Api::Manager::VendorsController < Api::Manager::BaseController
     property_ids = current_user.properties.pluck(:id)
     requests = vendor.assigned_requests.where(tenant: User.joins(:unit).where(units: { property_id: property_ids }))
 
+    ratings = vendor.vendor_ratings
+      .where(maintenance_request_id: requests.pluck(:id))
+      .includes(:maintenance_request, :tenant)
+      .order(created_at: :desc)
+
     render json: vendor_json(vendor).merge(
       maintenance_requests: requests.as_json(only: [ :id, :issue_type, :status, :severity, :created_at ]),
       stats: {
         quotes_received: vendor.quotes_received_count,
         requests_fulfilled: vendor.requests_fulfilled_count,
         average_rating: vendor.average_rating
+      },
+      ratings: ratings.map { |r|
+        {
+          stars: r.stars,
+          comment: r.comment,
+          issue_type: r.maintenance_request.issue_type,
+          tenant_name: r.tenant.name,
+          created_at: r.created_at
+        }
       }
     )
   end

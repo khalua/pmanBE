@@ -5,6 +5,11 @@ class Api::MaintenanceRequestsController < Api::BaseController
   def index
     requests = if current_user.tenant?
       current_user.maintenance_requests
+    elsif current_user.property_manager?
+      tenant_ids = User.joins(unit: :property)
+                       .where(properties: { property_manager_id: current_user.id })
+                       .pluck(:id)
+      MaintenanceRequest.where(tenant_id: tenant_ids)
     else
       MaintenanceRequest.all
     end
@@ -20,6 +25,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
     raw_severity = params[:severity]
     request = current_user.maintenance_requests.build(request_params.except(:severity, :chat_history))
     request.severity = normalize_severity(raw_severity)
+    request.tenant_available_time = params[:tenant_available_time] if params[:tenant_available_time].present?
     if params[:chat_history].present?
       request.chat_history = params[:chat_history].is_a?(String) ? JSON.parse(params[:chat_history]) : params[:chat_history]
     end
@@ -137,7 +143,16 @@ class Api::MaintenanceRequestsController < Api::BaseController
   private
 
   def set_request
-    @maintenance_request = MaintenanceRequest.find(params[:id])
+    @maintenance_request = if current_user.super_admin?
+      MaintenanceRequest.find(params[:id])
+    elsif current_user.property_manager?
+      tenant_ids = User.joins(unit: :property)
+                       .where(properties: { property_manager_id: current_user.id })
+                       .pluck(:id)
+      MaintenanceRequest.where(tenant_id: tenant_ids).find(params[:id])
+    else
+      current_user.maintenance_requests.find(params[:id])
+    end
   end
 
   def normalize_severity(value)
@@ -164,7 +179,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
   end
 
   def request_params
-    params.permit(:issue_type, :location, :severity, :conversation_summary, :allows_direct_contact, :chat_history, images: [])
+    params.permit(:issue_type, :location, :severity, :conversation_summary, :allows_direct_contact, :tenant_available_time, :chat_history, images: [])
   end
 
   def update_params
@@ -180,6 +195,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
       status: r.status,
       conversation_summary: r.conversation_summary,
       allows_direct_contact: r.allows_direct_contact,
+      tenant_available_time: r.tenant_available_time,
       tenant: {
         id: r.tenant.id, name: r.tenant.name, phone: r.tenant.phone, address: r.tenant.address,
         unit: r.tenant.unit ? { id: r.tenant.unit.id, identifier: r.tenant.unit.identifier, floor: r.tenant.unit.floor } : nil,
@@ -187,7 +203,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
       },
       assigned_vendor: r.assigned_vendor ? { id: r.assigned_vendor.id, name: r.assigned_vendor.name, contact_name: r.assigned_vendor.contact_name, cell_phone: r.assigned_vendor.cell_phone, phone_number: r.assigned_vendor.phone_number, email: r.assigned_vendor.email, rating: r.assigned_vendor.rating.to_f, is_available: r.assigned_vendor.is_available, location: r.assigned_vendor.location, vendor_type: r.assigned_vendor.vendor_type, specialties: r.assigned_vendor.specialties } : nil,
       image_urls: r.images.map { |img| rails_blob_url(img, disposition: "inline") },
-      quotes: r.quotes.includes(:vendor).map { |q| { id: q.id, vendor_id: q.vendor_id, vendor_name: q.vendor&.name, vendor_rating: q.vendor&.rating.to_f, estimated_cost: q.estimated_cost.to_f, work_description: q.work_description, estimated_arrival_time: q.estimated_arrival_time, created_at: q.created_at } },
+      quotes: r.quotes.includes(:vendor).map { |q| { id: q.id, vendor_id: q.vendor_id, vendor_name: q.vendor&.name, vendor_rating: q.vendor&.rating.to_f, estimated_cost: q.estimated_cost.to_f, work_description: q.work_description, estimated_arrival_time: q.estimated_arrival_time, can_arrive_at_tenant_time: q.can_arrive_at_tenant_time, created_at: q.created_at } },
       notes: r.notes.order(created_at: :asc).map { |n| { id: n.id, content: n.content, user: { id: n.user.id, name: n.user.name, role: n.user.role }, created_at: n.created_at } },
       chat_history: r.chat_history.reject { |m| m["role"] == "system" || m["content"]&.match?(/\AREADY_FOR_(PHOTOS|SUBMISSION)\z/) }.presence,
       created_at: r.created_at,

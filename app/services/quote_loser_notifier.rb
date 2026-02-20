@@ -12,9 +12,13 @@ class QuoteLoserNotifier
   def call
     return unless @vendor&.cell_phone.present?
 
-    body = "Thank you for submitting a quote for the #{@mr.issue_type} job. " \
-           "We've decided to go with another vendor this time, but we appreciate " \
-           "your time and hope to work with you in the future."
+    address = @mr.tenant&.unit&.property&.address || @mr.tenant&.address
+    location_str = address ? " for our #{@mr.issue_type} maintenance request for #{address}" : " for the #{@mr.issue_type} job"
+
+    body = "Thank you for submitting a quote#{location_str}.\n\n" \
+           "We've decided to go with another option for now, but we appreciate your time. " \
+           "We'll keep you in mind for future opportunities.\n\n" \
+           "Best regards"
 
     VendorNotificationMailer.sms_simulation(@vendor.name, body).deliver_later
   end

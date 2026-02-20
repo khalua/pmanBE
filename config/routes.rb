@@ -31,6 +31,7 @@ Rails.application.routes.draw do
     end
     namespace :manager do
       get "dashboard", to: "dashboard#show"
+      resource :profile, only: [ :edit, :update ]
       resources :tenants, only: [ :index, :show ] do
         member do
           post :move_out
@@ -117,6 +118,8 @@ Rails.application.routes.draw do
     post "summarize", to: "chat#summarize"
     post "support_chat", to: "chat#support_chat"
 
+    resource :profile, only: [ :show, :update ]
+
     post "reset", to: "reset#create"
 
     post "phone/verify/send", to: "phone_verifications#send_code"
@@ -157,5 +160,7 @@ Rails.application.routes.draw do
   end
 
   get "quote", to: "vendor_portal#show"
+  post "quote/contacted", to: "vendor_portal#mark_contacted"
+  post "quote/work_complete", to: "vendor_portal#mark_work_complete"
   get "health", to: "health#show"
 end

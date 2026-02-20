@@ -12,11 +12,10 @@ class Api::QuotesController < Api::BaseController
     mapped[:estimated_cost] = params[:estimated_cost] || params[:cost]
     mapped[:work_description] = params[:work_description] || params[:workDescription]
 
-    if params[:estimated_arrival_time].present?
-      mapped[:estimated_arrival_time] = params[:estimated_arrival_time]
-    elsif params[:arrivalDate].present?
-      time_str = params[:arrivalTime] || "09:00"
-      mapped[:estimated_arrival_time] = "#{params[:arrivalDate]} #{time_str}"
+    if params[:can_arrive_at_tenant_time].present?
+      mapped[:can_arrive_at_tenant_time] = params[:can_arrive_at_tenant_time]
+    elsif params[:canArriveAtTenantTime].present?
+      mapped[:can_arrive_at_tenant_time] = params[:canArriveAtTenantTime]
     end
 
     # Auto-assign vendor if one is assigned to the request and none specified
@@ -35,7 +34,7 @@ class Api::QuotesController < Api::BaseController
   end
 
   def approve
-    quote = Quote.find(params[:id])
+    quote = find_owned_quote
     mr = quote.maintenance_request
 
     ActiveRecord::Base.transaction do
@@ -55,7 +54,7 @@ class Api::QuotesController < Api::BaseController
   end
 
   def reject
-    quote = Quote.find(params[:id])
+    quote = find_owned_quote
 
     ActiveRecord::Base.transaction do
       quote.maintenance_request.update!(status: :quote_rejected)
@@ -74,8 +73,21 @@ class Api::QuotesController < Api::BaseController
 
   private
 
+  def find_owned_quote
+    if current_user.super_admin?
+      Quote.find(params[:id])
+    else
+      tenant_ids = User.joins(unit: :property)
+                       .where(properties: { property_manager_id: current_user.id })
+                       .pluck(:id)
+      Quote.joins(:maintenance_request)
+           .where(maintenance_requests: { tenant_id: tenant_ids })
+           .find(params[:id])
+    end
+  end
+
   def quote_params
-    params.permit(:vendor_id, :estimated_cost, :estimated_arrival_time, :work_description)
+    params.permit(:vendor_id, :estimated_cost, :estimated_arrival_time, :work_description, :can_arrive_at_tenant_time)
   end
 
   def quote_json(q)
@@ -86,6 +98,7 @@ class Api::QuotesController < Api::BaseController
       estimated_cost: q.estimated_cost.to_f,
       estimated_arrival_time: q.estimated_arrival_time,
       work_description: q.work_description,
+      can_arrive_at_tenant_time: q.can_arrive_at_tenant_time,
       created_at: q.created_at
     }
   end

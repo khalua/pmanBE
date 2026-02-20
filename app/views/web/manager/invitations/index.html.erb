@@ -24,7 +24,7 @@
         <select name="invitation[unit_id]" required class="mt-1 block w-full sm:w-1/3 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm py-2">
           <option value="">Select a unit</option>
           <% @units.each do |unit| %>
-            <option value="<%= unit.id %>"><%= unit.identifier %><%= " (Floor #{unit.floor})" if unit.floor %></option>
+            <option value="<%= unit.id %>" <%= "selected" if unit.id.to_s == @preselected_unit_id %>><%= unit.identifier %><%= " (Floor #{unit.floor})" if unit.floor %></option>
           <% end %>
         </select>
       </div>

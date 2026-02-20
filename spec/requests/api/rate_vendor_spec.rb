@@ -37,13 +37,14 @@ RSpec.describe "POST /api/maintenance_requests/:id/rate_vendor", type: :request 
     expect(response).to have_http_status(:unprocessable_entity)
   end
 
-  it "returns forbidden for non-tenant users" do
+  it "returns not_found for non-tenant users (managers cannot access tenant requests)" do
     manager = create(:user, :property_manager)
     post rate_vendor_api_maintenance_request_path(maintenance_request),
       params: { stars: 4 },
       headers: auth_headers(manager)
 
-    expect(response).to have_http_status(:forbidden)
+    # Manager has no properties containing this tenant, so they get 404 not 403
+    expect(response).to have_http_status(:not_found)
   end
 
   it "returns error when no vendor is assigned" do

@@ -4,7 +4,7 @@ class Web::Manager::PropertiesController < WebController
   before_action :set_property, only: [ :show, :edit, :update, :destroy ]
 
   def index
-    @properties = current_user.properties.includes(:units).order(:address)
+    @properties = current_user.properties.includes(:units).order(:name)
   end
 
   def show

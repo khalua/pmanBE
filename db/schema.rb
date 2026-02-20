@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_19_162027) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_20_175455) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -74,6 +74,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_162027) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.jsonb "chat_history", default: []
+    t.string "tenant_available_time"
     t.index ["assigned_vendor_id"], name: "index_maintenance_requests_on_assigned_vendor_id"
     t.index ["tenant_id"], name: "index_maintenance_requests_on_tenant_id"
   end
@@ -132,6 +133,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_162027) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "token", default: -> { "gen_random_uuid()" }, null: false
+    t.datetime "vendor_contacted_at"
+    t.datetime "vendor_work_completed_at"
     t.index ["maintenance_request_id", "vendor_id"], name: "index_quote_requests_on_maintenance_request_id_and_vendor_id", unique: true
     t.index ["maintenance_request_id"], name: "index_quote_requests_on_maintenance_request_id"
     t.index ["token"], name: "index_quote_requests_on_token", unique: true
@@ -146,6 +149,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_19_162027) do
     t.text "work_description"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "can_arrive_at_tenant_time"
     t.index ["maintenance_request_id"], name: "index_quotes_on_maintenance_request_id"
     t.index ["vendor_id"], name: "index_quotes_on_vendor_id"
   end

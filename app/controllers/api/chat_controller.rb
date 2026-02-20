@@ -15,8 +15,7 @@ class Api::ChatController < Api::BaseController
         extractedInfo: {
           "issueType" => issue_type,
           "location" => extracted_info["location"].presence || "unit",
-          "severity" => extracted_info["severity"].presence || "moderate",
-          "contactPreference" => extracted_info["contactPreference"].presence || "no"
+          "severity" => extracted_info["severity"].presence || "moderate"
         }
       }
     end
@@ -54,6 +53,7 @@ class Api::ChatController < Api::BaseController
     json = { response: bot_response }
     json[:options] = options if options.present?
     json[:managerNotes] = manager_notes if messages.empty? && manager_notes.any?
+    json[:workComplete] = true if bot_response == "WORK_COMPLETE"
     render json: json
   rescue => e
     Rails.logger.error("Support chat API error: #{e.message}")
@@ -67,14 +67,15 @@ class Api::ChatController < Api::BaseController
     begin
       user_messages = messages.select { |m| m[:role] == "user" }.map { |m| m[:content] }.join(" | ")
 
+      available_time = extracted_info["tenantAvailableTime"].presence || "Not specified"
+
       system_message = <<~PROMPT
-        You are writing a factual summary for a property manager based ONLY on what the tenant actually said. Do not add any assumptions.
+        You are writing a factual summary for a property manager based ONLY on what the tenant actually said. Do not add any assumptions. Do not use markdown, headings, or bullet points — plain text only.
 
         Tenant said: #{user_messages}
         Extracted info: #{extracted_info.to_json}
 
-        Write a 1-2 sentence summary that includes what problem the tenant reported, where it is, and any severity details.
-        Only include what the tenant explicitly stated.
+        Write 1-2 plain sentences covering: the problem, where it is, and severity. Then always append exactly: "Preferred service time: #{available_time}."
       PROMPT
 
       client = Anthropic::Client.new(api_key: ENV["ANTHROPIC_API_KEY"])
@@ -84,7 +85,8 @@ class Api::ChatController < Api::BaseController
         messages: [{ role: "user", content: system_message }]
       )
 
-      summary = response.content.first.text.strip
+      # Strip any markdown headings the model may still produce
+      summary = response.content.first.text.strip.gsub(/^#+\s.*\n?/, "").strip
 
       if params[:maintenance_request_id].present?
         mr = MaintenanceRequest.find(params[:maintenance_request_id])
@@ -97,7 +99,9 @@ class Api::ChatController < Api::BaseController
       issue_type = extracted_info["issueType"] || "maintenance issue"
       location = extracted_info["location"] || "property"
       severity = extracted_info["severity"] || "moderate"
-      render json: { summary: "Tenant reported a #{issue_type} in the #{location} with #{severity} severity." }
+      available_time = extracted_info["tenantAvailableTime"].presence
+      time_str = available_time ? " Available: #{available_time}." : ""
+      render json: { summary: "Tenant reported a #{issue_type} in the #{location} with #{severity} severity.#{time_str}" }
     end
   end
 
@@ -111,14 +115,13 @@ class Api::ChatController < Api::BaseController
       1. What the issue is (e.g. leak, mold, broken appliance, pest, etc.)
       2. Where it is (room + specific area if relevant) — SKIP this if the location is obvious from the issue (e.g. oven/fridge/dishwasher = kitchen, toilet/shower = bathroom, AC/heater = whole unit)
       3. How severe/urgent it is
-      4. Whether a service provider can contact them directly to schedule
 
       RULES:
       - Keep responses to 1-2 sentences. Sound like a real person, not a form.
       - Be empathetic on your FIRST response only. After that, get to the point.
       - Ask about ONE thing at a time. Combine questions only if they're closely related.
       - Use natural language for severity — "How bad is it?" not "Rate the severity."
-      - For contact preference, ask if it's OK for the service provider (plumber, electrician, exterminator, etc.) to call THEM directly to schedule a visit. Never suggest the tenant handle repairs themselves — all issues will be handled by a professional.
+      - Never suggest the tenant handle repairs themselves — all issues will be handled by a professional.
       - You decide when you have enough info. Don't ask unnecessary follow-ups if the tenant already gave clear details.
       - If the tenant gives you most info in one message, don't drag it out with extra questions.
       - Do NOT ask more than 5 questions total (not counting the initial greeting). You have asked #{assistant_count} so far. If this is your 5th question, wrap up and move to completion.
@@ -132,7 +135,7 @@ class Api::ChatController < Api::BaseController
       Only include OPTIONS when the question has clear, distinct choices. Do NOT include OPTIONS for open-ended questions.
 
       On EVERY response (including READY_FOR_PHOTOS/READY_FOR_SUBMISSION), append on a NEW line:
-      EXTRACTED_INFO:{"issueType":"...","location":"...","severity":"...","contactPreference":"..."}
+      EXTRACTED_INFO:{"issueType":"...","location":"...","severity":"..."}
       Use empty string "" for fields you don't know yet. The EXTRACTED_INFO and OPTIONS lines will be stripped before showing to the tenant.
 
       Already known: #{extracted_info.select { |_, v| v.present? }.to_json}
@@ -203,10 +206,10 @@ class Api::ChatController < Api::BaseController
       "submitted" => "the request has been received and is being reviewed",
       "vendor_quote_requested" => "we are reaching out to vendors for quotes",
       "quote_received" => "a quote has been received and is pending approval",
-      "quote_accepted" => "a vendor has been approved and will be in touch to schedule",
+      "quote_accepted" => "a vendor has been approved and will contact you soon to schedule the work",
       "quote_rejected" => "the quote was rejected and we are finding another vendor",
       "in_progress" => "the repair is currently in progress",
-      "completed" => "the repair has been completed"
+      "completed" => "the repair has been marked complete — please confirm if the work was done to your satisfaction"
     }
     status_description = status_descriptions[status] || "being processed"
 
@@ -229,6 +232,8 @@ class Api::ChatController < Api::BaseController
       - If asked when someone will call, refer to the arrival time if available, or say the vendor will be in touch soon.
       - If you don't know something specific, say so honestly and suggest they contact their property manager.
       - Do NOT help with new maintenance requests — only this existing one.
+      - If the tenant says the work is done, has been completed, was finished, they're satisfied, or anything indicating the job is complete, respond with exactly: WORK_COMPLETE
+      - Do NOT include any other text when responding WORK_COMPLETE.
 
       When your response naturally has 2-4 good follow-up questions the tenant might want to ask, append on a NEW line:
       OPTIONS:["Option 1","Option 2"]
@@ -281,15 +286,28 @@ class Api::ChatController < Api::BaseController
       return [ msg, options ]
     end
 
+    if status == "completed"
+      vendor_str = vendor_name ? "#{vendor_name} has" : "The vendor has"
+      msg = "Hi, I'm Prompt, your maintenance assistant. #{vendor_str} marked the work as complete. Was everything done to your satisfaction?"
+      options = [ "Yes, it's done", "No, there's still an issue", "What's next?" ]
+      return [ msg, options ]
+    end
+
+    if status == "quote_accepted" && vendor_name
+      msg = "Hi, I'm Prompt, your maintenance assistant. Great news — #{vendor_name} has been approved and will be reaching out to you soon to schedule. Has the work been done yet?"
+      options = [ "Yes, it's done", "Not yet", "When will they call?" ]
+      return [ msg, options ]
+    end
+
     if vendor_name && arrival_time
       msg = "Hi, I'm Prompt, your maintenance assistant. Your repair is scheduled with #{vendor_name} — anything you'd like to know?"
-      options = ["When will they call?", "What's the status?", "I have a question"]
+      options = [ "When will they call?", "What's the status?", "I have a question" ]
     elsif vendor_name
       msg = "Hi, I'm Prompt, your maintenance assistant. #{vendor_name} has been assigned to your request. How can I help?"
-      options = ["When will they call?", "What's the status?", "I have a question"]
+      options = [ "When will they call?", "What's the status?", "I have a question" ]
     else
       msg = "Hi, I'm Prompt, your maintenance assistant. I'm here to help with your maintenance request. What would you like to know?"
-      options = ["What's the status?", "What happens next?", "I have a question"]
+      options = [ "What's the status?", "What happens next?", "I have a question" ]
     end
     [ msg, options ]
   end

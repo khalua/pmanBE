@@ -10,6 +10,7 @@ class Web::Manager::InvitationsController < WebController
       .includes(:unit, :claimed_by)
       .order(created_at: :desc)
     @units = @property.units.order(:identifier)
+    @preselected_unit_id = params[:unit_id].presence
   end
 
   def create

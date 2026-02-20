@@ -7,6 +7,7 @@ tenant = User.find_or_create_by!(email: "tenant@example.com") do |u|
   u.name = "John Doe"
   u.password = "password123"
   u.phone = "555-123-4567"
+  u.mobile_phone = "555-123-4567"
   u.address = "123 Main St, Apt 4B, City, State 12345"
   u.role = :tenant
 end

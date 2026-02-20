@@ -40,7 +40,9 @@
       "Bash(git add:*)",
       "mcp__claude_ai_Figma__get_figjam",
       "mcp__claude_ai_Figma__generate_diagram",
-      "Bash(bundle exec rails test:*)"
+      "Bash(bundle exec rails test:*)",
+      "Bash(rails runner:*)",
+      "Bash(bundle exec rails routes:*)"
     ],
     "additionalDirectories": [
       "/Users/tony/Documents/Code/pman/"

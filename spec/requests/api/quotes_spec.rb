@@ -1,9 +1,13 @@
 require "rails_helper"
 
 RSpec.describe "Api::Quotes", type: :request do
-  let(:user) { create(:user, :property_manager) }
-  let(:vendor) { create(:vendor) }
-  let(:mr) { create(:maintenance_request, assigned_vendor: vendor, status: :vendor_quote_requested) }
+  # Wire manager → property → unit → tenant → maintenance_request so scoping works
+  let(:manager)  { create(:user, :property_manager) }
+  let(:property) { create(:property, property_manager: manager) }
+  let(:unit)     { create(:unit, property: property) }
+  let(:tenant)   { create(:user, unit: unit) }
+  let(:vendor)   { create(:vendor) }
+  let(:mr)       { create(:maintenance_request, tenant: tenant, assigned_vendor: vendor, status: :vendor_quote_requested) }
 
   describe "POST /api/quotes" do
     it "creates a quote without authentication" do
@@ -42,7 +46,7 @@ RSpec.describe "Api::Quotes", type: :request do
   describe "POST /api/quotes/:id/approve" do
     it "approves the quote and updates request status" do
       quote = create(:quote, maintenance_request: mr, vendor: vendor)
-      post "/api/quotes/#{quote.id}/approve", headers: auth_headers(user)
+      post "/api/quotes/#{quote.id}/approve", headers: auth_headers(manager)
       expect(response).to have_http_status(:ok)
       expect(mr.reload.status).to eq("quote_accepted")
     end
@@ -50,7 +54,8 @@ RSpec.describe "Api::Quotes", type: :request do
     it "assigns the vendor to the maintenance request" do
       other_vendor = create(:vendor)
       quote = create(:quote, maintenance_request: mr, vendor: other_vendor)
-      post "/api/quotes/#{quote.id}/approve", headers: auth_headers(user)
+      post "/api/quotes/#{quote.id}/approve", headers: auth_headers(manager)
+      expect(response).to have_http_status(:ok)
       expect(mr.reload.assigned_vendor).to eq(other_vendor)
     end
 
@@ -58,17 +63,31 @@ RSpec.describe "Api::Quotes", type: :request do
       quote = create(:quote, maintenance_request: mr, vendor: vendor)
       allow(PushNotificationService).to receive(:notify)
       expect {
-        post "/api/quotes/#{quote.id}/approve", headers: auth_headers(user)
+        post "/api/quotes/#{quote.id}/approve", headers: auth_headers(manager)
       }.to have_enqueued_mail(VendorNotificationMailer, :sms_simulation)
+    end
+
+    it "returns 404 when manager tries to approve a quote outside their properties" do
+      other_manager = create(:user, :property_manager)
+      quote = create(:quote, maintenance_request: mr, vendor: vendor)
+      post "/api/quotes/#{quote.id}/approve", headers: auth_headers(other_manager)
+      expect(response).to have_http_status(:not_found)
     end
   end
 
   describe "POST /api/quotes/:id/reject" do
     it "rejects the quote and updates request status" do
       quote = create(:quote, maintenance_request: mr, vendor: vendor)
-      post "/api/quotes/#{quote.id}/reject", headers: auth_headers(user)
+      post "/api/quotes/#{quote.id}/reject", headers: auth_headers(manager)
       expect(response).to have_http_status(:ok)
       expect(mr.reload.status).to eq("quote_rejected")
+    end
+
+    it "returns 404 when manager tries to reject a quote outside their properties" do
+      other_manager = create(:user, :property_manager)
+      quote = create(:quote, maintenance_request: mr, vendor: vendor)
+      post "/api/quotes/#{quote.id}/reject", headers: auth_headers(other_manager)
+      expect(response).to have_http_status(:not_found)
     end
   end
 end

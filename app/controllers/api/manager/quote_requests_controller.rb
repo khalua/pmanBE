@@ -39,7 +39,10 @@ class Api::Manager::QuoteRequestsController < Api::Manager::BaseController
   private
 
   def find_maintenance_request
-    MaintenanceRequest.find(params[:maintenance_request_id])
+    tenant_ids = User.joins(unit: :property)
+                     .where(properties: { property_manager_id: current_user.id })
+                     .pluck(:id)
+    MaintenanceRequest.where(tenant_id: tenant_ids).find(params[:maintenance_request_id])
   end
 
   def quote_request_json(qr)

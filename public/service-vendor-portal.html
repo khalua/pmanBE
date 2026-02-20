@@ -154,6 +154,71 @@
             grid-template-columns: 1fr 1fr;
             gap: 15px;
         }
+
+        .availability-toggle {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .toggle-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border: 2px solid #d1d1d6;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        .toggle-option:hover {
+            border-color: #007AFF;
+            background: #f0f7ff;
+        }
+
+        .toggle-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #007AFF;
+            flex-shrink: 0;
+        }
+
+        .toggle-option.selected-yes {
+            border-color: #34c759;
+            background: #f0fff4;
+        }
+
+        .toggle-option.selected-no {
+            border-color: #ff3b30;
+            background: #fff5f4;
+        }
+
+        .toggle-option-label {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .toggle-option-desc {
+            font-size: 13px;
+            color: #8e8e93;
+            margin-top: 2px;
+        }
+
+        .tenant-time-highlight {
+            background: #fff8e6;
+            border: 1px solid #ffd60a;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 8px;
+            font-size: 15px;
+            color: #1d1d1f;
+        }
+
+        .tenant-time-highlight strong {
+            color: #9b7000;
+        }
         
         .submit-btn {
             background: #007AFF;
@@ -255,11 +320,60 @@
             color: #0066cc;
             margin-bottom: 10px;
         }
-        
+
         .instructions p {
             margin: 8px 0;
             line-height: 1.6;
         }
+
+        .action-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            margin-top: 12px;
+            transition: opacity 0.2s;
+        }
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-green { background: #34c759; color: white; }
+        .btn-green:hover:not(:disabled) { background: #28a745; }
+        .btn-blue { background: #007AFF; color: white; }
+        .btn-blue:hover:not(:disabled) { background: #0056b3; }
+        .btn-gray { background: #e5e5ea; color: #636366; }
+
+        .contacted-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f0fff4;
+            border: 1px solid #34c759;
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            font-size: 15px;
+            color: #28a745;
+            font-weight: 500;
+        }
+
+        .rejected-section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 2px solid #ff9500;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .rejected-section h3 { color: #ff9500; margin-bottom: 10px; font-size: 22px; }
+        .rejected-section p { color: #636366; line-height: 1.6; }
         
         @media (max-width: 600px) {
             .container {
@@ -292,24 +406,52 @@
             <p id="header-subtitle">Please review the details below and submit your quote for this maintenance request.</p>
         </div>
         
+        <!-- Rejected state -->
+        <div class="rejected-section" id="rejected-section" style="display: none;">
+            <h3>Quote Not Selected</h3>
+            <p>Thank you for submitting a quote for our maintenance request.<br><br>We've decided to go with another option for now, but we appreciate your time. We'll keep you in mind for future opportunities.</p>
+        </div>
+
+        <!-- Approved state -->
         <div class="approved-section" id="approved-section" style="display: none;">
             <div class="approved-message">
                 <h3>🎉 Quote Approved!</h3>
-                <p>Your quote has been accepted by the property manager.</p>
+                <p>Your quote has been accepted. Please contact the tenant <strong>immediately</strong> to schedule the work.</p>
             </div>
-            
+
             <div class="tenant-contact">
                 <h4>Tenant Contact Information</h4>
-                <div class="contact-info">
-                    <p><strong>Name:</strong> John Doe</p>
-                    <p><strong>Phone:</strong> (555) 123-4567</p>
+                <div class="contact-info" id="tenant-contact-details">
+                    <!-- Populated by JS -->
                 </div>
             </div>
-            
+
             <div class="instructions">
                 <h4>Next Steps</h4>
-                <p>Please contact the tenant directly to coordinate your arrival time and any additional details.</p>
-                <p>The tenant is expecting your call and is ready to schedule the service.</p>
+                <p>1. Call the tenant now to confirm your arrival.</p>
+                <p>2. Tap <strong>"I've contacted the tenant"</strong> once you've reached them.</p>
+                <p>3. After completing the work, tap <strong>"Mark Work Complete"</strong>.</p>
+            </div>
+
+            <!-- I've contacted tenant button -->
+            <div id="contacted-section">
+                <button class="action-btn btn-blue" id="btn-contacted" onclick="markContacted()">
+                    📞 I've contacted the tenant
+                </button>
+            </div>
+            <div class="contacted-badge" id="contacted-badge" style="display: none;">
+                ✅ You've confirmed contact with the tenant
+            </div>
+
+            <!-- Mark Work Complete — only shown after contacted -->
+            <div id="work-complete-section" style="display: none;">
+                <button class="action-btn btn-green" id="btn-work-complete" onclick="markWorkComplete()">
+                    ✅ Mark Work Complete
+                </button>
+            </div>
+
+            <div class="contacted-badge" id="work-complete-badge" style="display: none; background: #e8f4fd; border-color: #007AFF; color: #007AFF;">
+                🎉 Work marked as complete. Thank you!
             </div>
         </div>
         
@@ -336,6 +478,10 @@
             <div class="detail-row" id="tenant-contact-row" style="display: none;">
                 <span class="label">Tenant Contact:</span>
                 <span class="value" id="tenant-contact">John Doe - (555) 123-4567</span>
+            </div>
+            <div class="detail-row" id="tenant-available-time-row" style="display: none;">
+                <span class="label">Tenant Available:</span>
+                <span class="value" id="tenant-available-time">Any time</span>
             </div>
             <div class="detail-row">
                 <span class="label">Reported:</span>
@@ -365,11 +511,26 @@
                     <input type="number" id="cost" name="cost" step="0.01" min="0" required placeholder="Enter dollar amount">
                 </div>
                 
-                <div class="form-group">
-                    <label for="arrival-date">Estimated Arrival Date</label>
-                    <div class="datetime-group">
-                        <input type="date" id="arrival-date" name="arrival-date" required>
-                        <input type="time" id="arrival-time" name="arrival-time" required>
+                <div class="form-group" id="availability-confirm-group">
+                    <label>Can you arrive during the tenant's preferred time?</label>
+                    <div class="tenant-time-highlight" id="tenant-time-display">
+                        <strong>Tenant prefers:</strong> <span id="tenant-time-label">Loading...</span>
+                    </div>
+                    <div class="availability-toggle" style="margin-top: 12px;">
+                        <label class="toggle-option" id="option-yes">
+                            <input type="radio" name="can_arrive_at_tenant_time" value="yes" required>
+                            <div>
+                                <div class="toggle-option-label">Yes, I can make it</div>
+                                <div class="toggle-option-desc">I'm available during the tenant's preferred window</div>
+                            </div>
+                        </label>
+                        <label class="toggle-option" id="option-no">
+                            <input type="radio" name="can_arrive_at_tenant_time" value="no">
+                            <div>
+                                <div class="toggle-option-label">No, I'll need to coordinate another time</div>
+                                <div class="toggle-option-desc">I'll contact the tenant to arrange a different time</div>
+                            </div>
+                        </label>
                     </div>
                 </div>
                 
@@ -396,26 +557,38 @@
         const urlParams = new URLSearchParams(window.location.search);
         const requestId = urlParams.get('id') || 'sample-request-123';
         const isApproved = false;
+        const isRejected = false;
+        const vendorContacted = false;
+        const vendorToken = null;
         const vendorId = null;
-        
-        // Set default arrival date to tomorrow
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        document.getElementById('arrival-date').value = tomorrow.toISOString().split('T')[0];
-        
-        // Set default arrival time to 9 AM
-        document.getElementById('arrival-time').value = '09:00';
-        
+
+        // Style availability toggle on selection
+        document.querySelectorAll('input[name="can_arrive_at_tenant_time"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                document.getElementById('option-yes').classList.remove('selected-yes');
+                document.getElementById('option-no').classList.remove('selected-no');
+                if (this.value === 'yes') {
+                    document.getElementById('option-yes').classList.add('selected-yes');
+                } else {
+                    document.getElementById('option-no').classList.add('selected-no');
+                }
+            });
+        });
+
         // Handle form submission
         document.getElementById('quote-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            
+
             const formData = new FormData(this);
+            const canArrive = formData.get('can_arrive_at_tenant_time');
+            if (!canArrive) {
+                alert('Please indicate whether you can arrive during the tenant\'s preferred time.');
+                return;
+            }
             const quote = {
                 requestId: requestId,
                 cost: parseFloat(formData.get('cost')),
-                arrivalDate: formData.get('arrival-date'),
-                arrivalTime: formData.get('arrival-time'),
+                canArriveAtTenantTime: canArrive === 'yes',
                 workDescription: formData.get('work-description'),
                 submittedAt: new Date().toISOString()
             };
@@ -443,12 +616,11 @@
             });
         });
         
+        // Populated by server
+        const tenantAvailableTime = null;
+
         // Load request details from URL parameters or API
         function loadRequestDetails() {
-            // In a real implementation, you would fetch this data from your backend
-            // using the requestId from the URL
-            
-            // For demo purposes, we're using static data
             const sampleData = {
                 issueType: 'Kitchen Sink Leak',
                 location: 'Kitchen sink under cabinet',
@@ -457,7 +629,7 @@
                 tenantContact: 'John Doe - (555) 123-4567',
                 reportedTime: 'Today at 2:30 PM'
             };
-            
+
             // Populate the page with request details
             document.getElementById('issue-type').textContent = sampleData.issueType;
             document.getElementById('location').textContent = sampleData.location;
@@ -465,24 +637,113 @@
             document.getElementById('address').textContent = sampleData.address;
             document.getElementById('tenant-contact').textContent = sampleData.tenantContact;
             document.getElementById('reported-time').textContent = sampleData.reportedTime;
-            
+
+            // Show tenant available time if present
+            const availTime = tenantAvailableTime;
+            if (availTime) {
+                document.getElementById('tenant-available-time').textContent = availTime;
+                document.getElementById('tenant-available-time-row').style.display = 'flex';
+                document.getElementById('tenant-time-label').textContent = availTime;
+            } else {
+                document.getElementById('tenant-available-time-row').style.display = 'none';
+                document.getElementById('tenant-time-display').style.display = 'none';
+            }
+
+            // Handle rejected state
+            if (isRejected) {
+                document.getElementById('rejected-section').style.display = 'block';
+                document.getElementById('quote-form-section').style.display = 'none';
+                document.getElementById('approved-section').style.display = 'none';
+                document.getElementById('header-title').textContent = 'Quote Not Selected';
+                document.getElementById('header-subtitle').textContent = 'Thank you for your time.';
+                document.getElementById('severity').className = `severity-badge severity-${sampleData.severity}`;
+                return;
+            }
+
             // Show tenant contact information only if quote is approved
             if (isApproved) {
                 document.getElementById('tenant-contact-row').style.display = 'flex';
                 document.getElementById('quote-form-section').style.display = 'none';
                 document.getElementById('approved-section').style.display = 'block';
+                document.getElementById('rejected-section').style.display = 'none';
                 document.getElementById('header-title').textContent = '🎉 Quote Approved';
-                document.getElementById('header-subtitle').textContent = 'Your quote has been accepted! Contact the tenant to coordinate your visit.';
+                document.getElementById('header-subtitle').textContent = 'Your quote has been accepted! Please contact the tenant immediately.';
+
+                // Populate tenant contact details in approved section
+                document.getElementById('tenant-contact-details').innerHTML =
+                    `<p><strong>Name:</strong> ${sampleData.tenantContact.split(' - ')[0]}</p>` +
+                    `<p><strong>Phone:</strong> ${sampleData.tenantContact.split(' - ')[1] || 'On file'}</p>`;
+
+                // Restore contacted state if already done
+                if (vendorContacted) {
+                    document.getElementById('contacted-badge').style.display = 'flex';
+                    document.getElementById('btn-contacted').style.display = 'none';
+                    document.getElementById('work-complete-section').style.display = 'block';
+                }
             } else {
                 document.getElementById('tenant-contact-row').style.display = 'none';
                 document.getElementById('approved-section').style.display = 'none';
+                document.getElementById('rejected-section').style.display = 'none';
             }
-            
+
             // Set severity badge class
             const severityElement = document.getElementById('severity');
             severityElement.className = `severity-badge severity-${sampleData.severity}`;
         }
-        
+
+        function markContacted() {
+            if (!vendorToken) return;
+            const btn = document.getElementById('btn-contacted');
+            btn.disabled = true;
+            btn.textContent = 'Sending...';
+
+            fetch('/quote/contacted', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: vendorToken })
+            })
+            .then(r => r.json())
+            .then(() => {
+                document.getElementById('contacted-badge').style.display = 'flex';
+                btn.style.display = 'none';
+                document.getElementById('work-complete-section').style.display = 'block';
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = '📞 I\'ve contacted the tenant';
+                alert('Something went wrong. Please try again.');
+            });
+        }
+
+        function markWorkComplete() {
+            if (!vendorToken) return;
+            const btn = document.getElementById('btn-work-complete');
+            btn.disabled = true;
+            btn.textContent = 'Submitting...';
+
+            fetch('/quote/work_complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: vendorToken })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    btn.disabled = false;
+                    btn.textContent = '✅ Mark Work Complete';
+                    alert(data.error);
+                } else {
+                    document.getElementById('work-complete-section').style.display = 'none';
+                    document.getElementById('work-complete-badge').style.display = 'flex';
+                }
+            })
+            .catch(() => {
+                btn.disabled = false;
+                btn.textContent = '✅ Mark Work Complete';
+                alert('Something went wrong. Please try again.');
+            });
+        }
+
         // Load request details when page loads
         loadRequestDetails();
     </script>

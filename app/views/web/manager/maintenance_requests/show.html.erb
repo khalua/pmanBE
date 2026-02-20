@@ -119,6 +119,12 @@
           <% end %>
         </dd>
       </div>
+      <% if @maintenance_request.tenant_available_time.present? %>
+      <div>
+        <dt class="text-sm font-medium text-gray-500">Time Tenant Available</dt>
+        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.tenant_available_time %></dd>
+      </div>
+      <% end %>
       <div>
         <dt class="text-sm font-medium text-gray-500">Severity</dt>
         <dd class="mt-1">
@@ -365,20 +371,69 @@
 
   <%# Send quote requests form %>
   <% already_requested_ids = @maintenance_request.quote_requests.pluck(:vendor_id) %>
-  <% requestable_vendors = @vendors.where.not(id: already_requested_ids) %>
+  <% requestable_vendors = @vendors.where.not(id: already_requested_ids).order(:name) %>
   <% if requestable_vendors.any? && !@maintenance_request.completed? && !@maintenance_request.closed? && !@maintenance_request.in_progress? && !@maintenance_request.quote_accepted? %>
+    <%
+      issue = @maintenance_request.issue_type.to_s.downcase
+      loc   = @maintenance_request.location.to_s.downcase
+      best_type =
+        if (issue.include?("leak") && (loc.include?("roof") || loc.include?("ceiling"))) || issue.include?("roof") || issue.include?("gutter")
+          "roofing"
+        elsif issue.include?("leak") || issue.include?("pipe") || issue.include?("plumb") || issue.include?("drain") || issue.include?("faucet") || issue.include?("toilet") || issue.include?("water")
+          "plumbing"
+        elsif issue.include?("electric") || issue.include?("power") || issue.include?("outlet") || issue.include?("light")
+          "electrical"
+        elsif issue.include?("appliance") || issue.include?("fridge") || issue.include?("washer") || issue.include?("dryer") || issue.include?("dishwasher") || issue.include?("stove") || issue.include?("oven")
+          "appliance"
+        elsif issue.include?("heat") || issue.include?("cool") || issue.include?("ac") || issue.include?("hvac") || issue.include?("furnace") || issue.include?("thermostat")
+          "hvac"
+        elsif issue.include?("floor") || issue.include?("carpet") || issue.include?("tile") || issue.include?("hardwood")
+          "flooring"
+        elsif issue.include?("pest") || issue.include?("bug") || issue.include?("roach") || issue.include?("ant") || issue.include?("rodent") || issue.include?("mice") || issue.include?("rat")
+          "pest_control"
+        else
+          "general"
+        end
+      has_specific_match = best_type != "general"
+      recommended = has_specific_match ? requestable_vendors.select { |v| v.vendor_type == best_type || v.vendor_type == "general" } : []
+      others      = has_specific_match ? requestable_vendors.reject { |v| recommended.include?(v) } : requestable_vendors.to_a
+    %>
     <div class="mt-6 bg-white shadow rounded-lg p-6">
       <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Quotes</h2>
       <%= form_with url: web_manager_maintenance_request_quote_requests_path(@maintenance_request), method: :post do |f| %>
-        <div class="space-y-3">
-          <% requestable_vendors.each do |vendor| %>
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input type="checkbox" name="vendor_ids[]" value="<%= vendor.id %>" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-              <span class="text-sm text-gray-900"><%= vendor.name %></span>
-              <span class="text-xs text-gray-500">(<%= vendor.vendor_type %>)</span>
-            </label>
+        <% if recommended.any? %>
+          <div class="mb-4 rounded-lg bg-blue-50 border border-blue-200 p-4">
+            <div class="flex items-center gap-2 mb-3">
+              <span class="text-yellow-500">★</span>
+              <span class="text-sm font-semibold text-blue-800">Best Match — <%= best_type.humanize %></span>
+            </div>
+            <div class="space-y-2">
+              <% recommended.each do |vendor| %>
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input type="checkbox" name="vendor_ids[]" value="<%= vendor.id %>" class="rounded border-blue-300 text-blue-600 focus:ring-blue-500">
+                  <span class="text-sm text-gray-900 font-medium"><%= vendor.name %></span>
+                  <span class="text-xs text-blue-600">(<%= vendor.vendor_type.humanize %>)</span>
+                </label>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+
+        <% if others.any? %>
+          <% if recommended.any? %>
+            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-2">Other Vendors</p>
           <% end %>
-        </div>
+          <div class="space-y-2">
+            <% others.each do |vendor| %>
+              <label class="flex items-center gap-3 cursor-pointer">
+                <input type="checkbox" name="vendor_ids[]" value="<%= vendor.id %>" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="text-sm text-gray-900"><%= vendor.name %></span>
+                <span class="text-xs text-gray-500">(<%= vendor.vendor_type.humanize %>)</span>
+              </label>
+            <% end %>
+          </div>
+        <% end %>
+
         <div class="mt-4">
           <%= f.submit "Send Quote Requests", class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 cursor-pointer" %>
         </div>
