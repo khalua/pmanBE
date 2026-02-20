@@ -107,7 +107,7 @@
       </div>
       <div>
         <dt class="text-sm font-medium text-gray-500">Submitted</dt>
-        <dd class="mt-1 text-sm text-gray-900"><%= @maintenance_request.created_at.strftime("%b %d, %Y %l:%M %p") %></dd>
+        <dd class="mt-1 text-sm text-gray-900"><%= local_time(@maintenance_request.created_at, format: :datetime) %></dd>
       </div>
       <% if @maintenance_request.assigned_vendor %>
         <div>
@@ -177,7 +177,7 @@
         </div>
         <div>
           <dt class="text-sm font-medium text-gray-500">Estimated Arrival</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= quote.estimated_arrival_time&.strftime("%b %d, %Y %l:%M %p") || "-" %></dd>
+          <dd class="mt-1 text-sm text-gray-900"><%= local_time(quote.estimated_arrival_time, format: :datetime) %></dd>
         </div>
         <% if quote.work_description.present? %>
           <div class="sm:col-span-2">
@@ -203,7 +203,7 @@
                   <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Manager</span>
                 <% end %>
               </div>
-              <span class="text-xs text-gray-500"><%= note.created_at.strftime("%b %d, %Y %l:%M %p") %></span>
+              <span class="text-xs text-gray-500"><%= local_time(note.created_at, format: :datetime) %></span>
             </div>
             <p class="mt-2 text-sm text-gray-700"><%= note.content %></p>
           </div>

@@ -234,7 +234,7 @@
                   <%= qr.status.humanize %>
                 </span>
               </td>
-              <td class="px-4 py-2 text-sm text-gray-500"><%= qr.created_at.strftime("%b %d, %Y %l:%M %p") %></td>
+              <td class="px-4 py-2 text-sm text-gray-500"><%= local_time(qr.created_at, format: :datetime) %></td>
             </tr>
           <% end %>
         </tbody>
@@ -308,8 +308,7 @@
                 <td class="px-4 py-2 text-sm text-gray-900"><%= quote.work_description %></td>
                 <td class="px-4 py-2 text-sm text-gray-500">
                   <% if quote.estimated_arrival_time %>
-                    <%= quote.estimated_arrival_time.strftime("%b %d, %Y %l:%M %p") %>
-                    <div class="text-xs text-gray-400"><%= time_ago_in_words(quote.estimated_arrival_time) %> from now</div>
+                    <%= local_time(quote.estimated_arrival_time, format: :datetime) %>
                   <% else %>
                     -
                   <% end %>
@@ -346,7 +345,7 @@
                   <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-800">Manager</span>
                 <% end %>
               </div>
-              <span class="text-xs text-gray-500"><%= note.created_at.strftime("%b %d, %Y %l:%M %p") %></span>
+              <span class="text-xs text-gray-500"><%= local_time(note.created_at, format: :datetime) %></span>
             </div>
             <p class="mt-2 text-sm text-gray-700"><%= note.content %></p>
           </div>

@@ -121,7 +121,7 @@
                 <td class="py-2">
                   <span class="inline-flex px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800"><%= req.status&.humanize %></span>
                 </td>
-                <td class="py-2 text-gray-400"><%= req.created_at.strftime("%b %d, %Y") %></td>
+                <td class="py-2 text-gray-400"><%= local_time(req.created_at) %></td>
               </tr>
             <% end %>
           </tbody>

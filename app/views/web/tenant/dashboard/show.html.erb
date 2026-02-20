@@ -82,7 +82,7 @@
                   <% end %>
                 </div>
               </td>
-              <td class="px-4 py-3 text-sm text-gray-500"><%= req.created_at.strftime("%b %d, %Y") %></td>
+              <td class="px-4 py-3 text-sm text-gray-500"><%= local_time(req.created_at) %></td>
             </tr>
           <% end %>
           <% if @maintenance_requests.empty? %>

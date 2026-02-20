@@ -96,7 +96,7 @@
     </div>
     <div class="bg-white rounded-lg shadow p-4">
       <p class="text-sm font-medium text-gray-500">Created</p>
-      <p class="mt-1 text-lg font-semibold text-gray-900"><%= @maintenance_request.created_at.strftime("%b %d, %Y") %></p>
+      <p class="mt-1 text-lg font-semibold text-gray-900"><%= local_time(@maintenance_request.created_at) %></p>
     </div>
   </div>
 
@@ -221,7 +221,7 @@
           <div class="bg-white rounded-lg shadow p-4">
             <div class="flex justify-between items-start">
               <p class="text-sm font-medium text-gray-900"><%= note.user.name %> <span class="text-gray-400 font-normal">(<%= note.user.role.humanize %>)</span></p>
-              <p class="text-xs text-gray-400"><%= note.created_at.strftime("%b %d, %Y %l:%M %p") %></p>
+              <p class="text-xs text-gray-400"><%= local_time(note.created_at, format: :datetime) %></p>
             </div>
             <p class="mt-1 text-sm text-gray-700"><%= note.content %></p>
           </div>

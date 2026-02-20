@@ -150,7 +150,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
     begin
       client = Anthropic::Client.new(api_key: ENV["ANTHROPIC_API_KEY"])
       response = client.messages.create(
-        model: "claude-3-haiku-20240307",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 10,
         messages: [{ role: "user", content: "A tenant described the severity of their maintenance issue as: \"#{value}\"\n\nClassify this into exactly one of: minor, moderate, urgent, emergency\n\nRespond with only the single word." }]
       )

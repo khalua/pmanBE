@@ -34,7 +34,7 @@
                 <%= user.role.humanize %>
               </span>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-500"><%= user.created_at.strftime("%b %d, %Y") %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= local_time(user.created_at) %></td>
             <td class="px-4 py-3 text-sm">
               <% if user != current_user %>
                 <%= button_to "Delete", web_admin_user_path(user), method: :delete,

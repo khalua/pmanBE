@@ -49,7 +49,7 @@
                 <%= req.status.humanize %>
               </span>
             </td>
-            <td class="px-4 py-3 text-sm text-gray-500"><%= req.created_at.strftime("%b %d, %Y") %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= local_time(req.created_at) %></td>
             <td class="px-4 py-3 text-sm flex gap-2">
               <%= link_to "View", web_admin_maintenance_request_path(req), class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
               <%= button_to "Delete", web_admin_maintenance_request_path(req), method: :delete,

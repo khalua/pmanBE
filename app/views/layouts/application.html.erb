@@ -70,5 +70,22 @@
       </div>
     </div>
   </footer>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      document.querySelectorAll("time[datetime]").forEach(function(el) {
+        var d = new Date(el.getAttribute("datetime"));
+        var fmt = el.dataset.format;
+        if (fmt === "datetime") {
+          el.textContent = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        } else if (fmt === "short_date") {
+          el.textContent = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+        } else if (fmt === "long_date") {
+          el.textContent = d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" });
+        } else {
+          el.textContent = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+        }
+      });
+    });
+  </script>
 </body>
 </html>
