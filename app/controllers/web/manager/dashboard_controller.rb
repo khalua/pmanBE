@@ -10,7 +10,10 @@ class Web::Manager::DashboardController < WebController
       .joins(tenant: :unit)
       .where(units: { property_id: @properties.select(:id) })
       .includes(tenant: { unit: :property }, assigned_vendor: {})
-      .order(created_at: :desc)
+      .order(
+        Arel.sql("CASE WHEN status IN (6, 7) THEN 1 ELSE 0 END ASC"),
+        updated_at: :desc
+      )
     @vendors_count = current_user.vendors.count
     @open_requests_count = @maintenance_requests.count { |r| !%w[completed closed].include?(r.status) }
   end

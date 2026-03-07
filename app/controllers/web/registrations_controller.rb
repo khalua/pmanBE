@@ -37,7 +37,7 @@ class Web::RegistrationsController < WebController
       email: @invitation.tenant_email,
       password: params[:password],
       password_confirmation: params[:password_confirmation],
-      mobile_phone: params[:mobile_phone],
+      cell_phone: params[:cell_phone],
       role: :tenant,
       unit_id: @invitation.unit_id,
       move_in_date: Date.current
@@ -60,7 +60,7 @@ class Web::RegistrationsController < WebController
       email: @manager_invitation.manager_email,
       password: params[:password],
       password_confirmation: params[:password_confirmation],
-      mobile_phone: params[:mobile_phone],
+      cell_phone: params[:cell_phone],
       role: :property_manager
     )
 

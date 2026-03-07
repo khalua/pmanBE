@@ -15,7 +15,11 @@ class Vendor < ApplicationRecord
     general: 4,
     roofing: 5,
     flooring: 6,
-    pest_control: 7
+    pest_control: 7,
+    carpentry: 8,
+    painting: 9,
+    masonry: 10,
+    landscaping: 11
   }
 
   validates :name, presence: true

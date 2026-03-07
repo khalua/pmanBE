@@ -19,6 +19,7 @@
               <%= link_to "Properties", web_manager_properties_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
               <%= link_to "Tenants", web_manager_tenants_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
               <%= link_to "Vendors", web_manager_vendors_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
+              <%= link_to "Maintenance Requests", web_manager_maintenance_requests_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
             <% end %>
             <% if current_user.super_admin? %>
               <%= link_to "Users", web_admin_users_path, class: "text-sm font-medium text-gray-600 hover:text-indigo-600" %>
@@ -76,8 +77,20 @@
       document.querySelectorAll("time[datetime]").forEach(function(el) {
         var d = new Date(el.getAttribute("datetime"));
         var fmt = el.dataset.format;
-        if (fmt === "datetime") {
-          el.textContent = d.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) + " " + d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        var dateStr = (d.getMonth()+1).toString().padStart(2,"0") + "/" + d.getDate().toString().padStart(2,"0") + "/" + d.getFullYear().toString().slice(-2);
+        var timeStr = d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
+        if (fmt === "datetime_ago") {
+          var now = new Date();
+          var diffMs = now - d;
+          var diffMins = Math.floor(diffMs / 60000);
+          var ago;
+          if (diffMins < 1) { ago = "just now"; }
+          else if (diffMins < 60) { ago = diffMins + " minute" + (diffMins === 1 ? "" : "s") + " ago"; }
+          else if (diffMins < 1440) { var h = Math.floor(diffMins/60); ago = h + " hour" + (h === 1 ? "" : "s") + " ago"; }
+          else { var dy = Math.floor(diffMins/1440); ago = dy + " day" + (dy === 1 ? "" : "s") + " ago"; }
+          el.textContent = dateStr + " " + timeStr + " \u2014 " + ago;
+        } else if (fmt === "datetime") {
+          el.textContent = dateStr + " " + timeStr;
         } else if (fmt === "short_date") {
           el.textContent = d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
         } else if (fmt === "long_date") {

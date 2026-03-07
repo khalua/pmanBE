@@ -15,7 +15,7 @@ class Web::Manager::QuoteRequestsController < WebController
     end
 
     if created.any?
-      mr.update!(status: :vendor_quote_requested)
+      mr.update!(status: :in_progress)
       created.each do |qr|
         QuoteRequestNotifier.call(qr)
         qr.update!(status: :sent)

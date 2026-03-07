@@ -40,16 +40,8 @@ Rails.application.configure do
 
   config.action_mailer.default_url_options = { host: "localhost", port: 3000 }
 
-  # Resend SMTP
-  config.action_mailer.delivery_method = :smtp
-  config.action_mailer.smtp_settings = {
-    address: "smtp.resend.com",
-    port: 465,
-    user_name: "resend",
-    password: ENV["RESEND_API_KEY"],
-    authentication: :plain,
-    tls: true
-  }
+  # Resend HTTP API (port 443, never blocked)
+  config.action_mailer.delivery_method = :resend
 
   # Required for Active Storage URLs (rails_blob_url) in API controllers
   Rails.application.routes.default_url_options[:host] = "localhost:3000"
@@ -71,6 +63,9 @@ Rails.application.configure do
 
   # Highlight code that enqueued background job in logs.
   config.active_job.verbose_enqueue_logs = true
+
+  # Run jobs inline in dev so deliver_later works synchronously
+  config.active_job.queue_adapter = :inline
 
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true

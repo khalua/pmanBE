@@ -18,7 +18,7 @@ class VendorPortalController < ApplicationController
         location: maintenance_request.location,
         severity: maintenance_request.severity,
         address: maintenance_request.tenant&.unit&.property&.address || maintenance_request.tenant&.address || "Address not available",
-        tenantContact: "#{maintenance_request.tenant&.name} - #{maintenance_request.tenant&.phone}",
+        tenantContact: "#{maintenance_request.tenant&.name} - #{maintenance_request.tenant&.cell_phone}",
         reportedTime: maintenance_request.created_at.strftime("%B %d, %Y at %I:%M %p"),
         tenantAvailableTime: maintenance_request.tenant_available_time
       }

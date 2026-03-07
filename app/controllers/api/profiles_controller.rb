@@ -23,9 +23,9 @@ class Api::ProfilesController < Api::BaseController
   end
 
   def profile_params
-    permitted = params.permit(:name, :phone, :email)
+    permitted = params.permit(:name, :cell_phone, :email)
     if password_change_requested?
-      permitted = params.permit(:name, :phone, :email, :password, :password_confirmation)
+      permitted = params.permit(:name, :cell_phone, :email, :password, :password_confirmation)
     end
     permitted
   end
@@ -35,7 +35,7 @@ class Api::ProfilesController < Api::BaseController
       id: user.id,
       email: user.email,
       name: user.name,
-      phone: user.phone,
+      cell_phone: user.cell_phone,
       address: user.address,
       role: user.role,
       phone_verified: user.phone_verified

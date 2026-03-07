@@ -28,9 +28,9 @@ class Web::Manager::ProfilesController < WebController
 
   def profile_params
     if password_change_requested?
-      params.require(:user).permit(:name, :phone, :email, :password, :password_confirmation)
+      params.require(:user).permit(:name, :cell_phone, :email, :password, :password_confirmation)
     else
-      params.require(:user).permit(:name, :phone, :email)
+      params.require(:user).permit(:name, :cell_phone, :email)
     end
   end
 

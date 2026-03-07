@@ -112,10 +112,10 @@
           <dt class="text-sm text-gray-500">Email</dt>
           <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.email %></dd>
         </div>
-        <% if @maintenance_request.tenant.phone.present? %>
+        <% if @maintenance_request.tenant.cell_phone.present? %>
           <div>
-            <dt class="text-sm text-gray-500">Phone</dt>
-            <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.phone %></dd>
+            <dt class="text-sm text-gray-500">Cell Phone</dt>
+            <dd class="text-sm font-medium text-gray-900"><%= @maintenance_request.tenant.cell_phone %></dd>
           </div>
         <% end %>
         <% if @maintenance_request.tenant.unit %>

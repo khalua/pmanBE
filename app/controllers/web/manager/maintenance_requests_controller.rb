@@ -2,6 +2,17 @@ class Web::Manager::MaintenanceRequestsController < WebController
   before_action :authenticate_user!
   before_action :require_property_manager!
 
+  def index
+    @maintenance_requests = MaintenanceRequest
+      .joins(tenant: :unit)
+      .where(units: { property_id: current_user.properties.select(:id) })
+      .includes(tenant: { unit: :property }, assigned_vendor: {})
+      .order(
+        Arel.sql("CASE WHEN status IN (6, 7) THEN 1 ELSE 0 END ASC"),
+        updated_at: :desc
+      )
+  end
+
   def show
     @maintenance_request = find_request
     @vendors = current_user.vendors.order(:name)

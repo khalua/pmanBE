@@ -24,7 +24,7 @@
           <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_manager_tenant_path(tenant) %>'">
             <td class="px-4 py-3 text-sm font-medium text-gray-900"><%= tenant.name %></td>
             <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.email %></td>
-            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.mobile_phone.presence || "-" %></td>
+            <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.cell_phone.presence || "-" %></td>
             <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.unit.property.name.presence || tenant.unit.property.address %></td>
             <td class="px-4 py-3 text-sm text-gray-500"><%= tenant.unit.identifier %></td>
             <td class="px-4 py-3">

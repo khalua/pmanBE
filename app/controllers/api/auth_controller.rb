@@ -70,7 +70,7 @@ class Api::AuthController < Api::BaseController
   end
 
   def register_params
-    params.permit(:email, :password, :name, :phone, :mobile_phone, :address, :role)
+    params.permit(:email, :password, :name, :cell_phone, :address, :role)
   end
 
   def user_json(user)
@@ -78,7 +78,7 @@ class Api::AuthController < Api::BaseController
       id: user.id,
       email: user.email,
       name: user.name,
-      phone: user.phone,
+      cell_phone: user.cell_phone,
       address: user.address,
       role: user.role,
       phone_verified: user.phone_verified

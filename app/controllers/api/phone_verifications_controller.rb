@@ -1,7 +1,7 @@
 class Api::PhoneVerificationsController < Api::BaseController
   def send_code
     verification = current_user.phone_verifications.create!(
-      phone_number: current_user.mobile_phone
+      phone_number: current_user.cell_phone
     )
 
     # Simulated SMS — log the code instead of sending via Twilio

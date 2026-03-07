@@ -31,8 +31,7 @@ class QuoteApprovalNotifier
            "IMPORTANT: Please contact the tenant as soon as possible to schedule the work.\n\n" \
            "Tenant contact info:\n" \
            "Name: #{@tenant.name}\n" \
-           "Phone: #{@tenant.phone}\n" \
-           "Cell: #{@vendor.cell_phone}\n" \
+           "Cell: #{@tenant.cell_phone}\n" \
            "Email: #{@tenant.email}\n\n"
 
     body += "View full request details:\n#{portal_link}\n\n" if portal_link
@@ -42,7 +41,7 @@ class QuoteApprovalNotifier
   end
 
   def notify_tenant
-    contact = [ @vendor.cell_phone.presence, @vendor.phone.presence ].compact.first
+    contact = @vendor.cell_phone.presence
     contact_str = contact ? " (#{contact})" : ""
     PushNotificationService.notify(
       user: @tenant,

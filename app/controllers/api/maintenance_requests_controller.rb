@@ -158,6 +158,7 @@ class Api::MaintenanceRequestsController < Api::BaseController
   def normalize_severity(value)
     return :moderate if value.blank?
     v = value.to_s.downcase.strip
+    return :moderate if v == "unspecified"
     valid = %w[minor moderate urgent emergency]
     return v.to_sym if valid.include?(v)
 
@@ -197,11 +198,11 @@ class Api::MaintenanceRequestsController < Api::BaseController
       allows_direct_contact: r.allows_direct_contact,
       tenant_available_time: r.tenant_available_time,
       tenant: {
-        id: r.tenant.id, name: r.tenant.name, phone: r.tenant.phone, address: r.tenant.address,
+        id: r.tenant.id, name: r.tenant.name, cell_phone: r.tenant.cell_phone, address: r.tenant.address,
         unit: r.tenant.unit ? { id: r.tenant.unit.id, identifier: r.tenant.unit.identifier, floor: r.tenant.unit.floor } : nil,
         property: r.tenant.unit&.property ? { id: r.tenant.unit.property.id, name: r.tenant.unit.property.name, address: r.tenant.unit.property.address, property_type: r.tenant.unit.property.property_type } : nil
       },
-      assigned_vendor: r.assigned_vendor ? { id: r.assigned_vendor.id, name: r.assigned_vendor.name, contact_name: r.assigned_vendor.contact_name, cell_phone: r.assigned_vendor.cell_phone, phone_number: r.assigned_vendor.phone_number, email: r.assigned_vendor.email, rating: r.assigned_vendor.rating.to_f, is_available: r.assigned_vendor.is_available, location: r.assigned_vendor.location, vendor_type: r.assigned_vendor.vendor_type, specialties: r.assigned_vendor.specialties } : nil,
+      assigned_vendor: r.assigned_vendor ? { id: r.assigned_vendor.id, name: r.assigned_vendor.name, contact_name: r.assigned_vendor.contact_name, cell_phone: r.assigned_vendor.cell_phone, email: r.assigned_vendor.email, rating: r.assigned_vendor.rating.to_f, is_available: r.assigned_vendor.is_available, location: r.assigned_vendor.location, vendor_type: r.assigned_vendor.vendor_type, specialties: r.assigned_vendor.specialties } : nil,
       image_urls: r.images.map { |img| rails_blob_url(img, disposition: "inline") },
       quotes: r.quotes.includes(:vendor).map { |q| { id: q.id, vendor_id: q.vendor_id, vendor_name: q.vendor&.name, vendor_rating: q.vendor&.rating.to_f, estimated_cost: q.estimated_cost.to_f, work_description: q.work_description, estimated_arrival_time: q.estimated_arrival_time, can_arrive_at_tenant_time: q.can_arrive_at_tenant_time, created_at: q.created_at } },
       notes: r.notes.order(created_at: :asc).map { |n| { id: n.id, content: n.content, user: { id: n.user.id, name: n.user.name, role: n.user.role }, created_at: n.created_at } },

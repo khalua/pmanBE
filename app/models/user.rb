@@ -18,7 +18,7 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: { case_sensitive: false },
                     format: { with: URI::MailTo::EMAIL_REGEXP }
   validates :name, presence: true
-  validates :mobile_phone, presence: true, if: :tenant?
+  validates :cell_phone, presence: true, if: :tenant?
 
   def gmail_account?
     email&.downcase&.end_with?("@gmail.com")

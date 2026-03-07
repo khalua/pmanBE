@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_02_20_175455) do
+ActiveRecord::Schema[7.2].define(version: 2026_02_20_190604) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -184,7 +184,6 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_20_175455) do
     t.string "email", null: false
     t.string "password_digest", null: false
     t.string "name", null: false
-    t.string "phone"
     t.string "address"
     t.integer "role", default: 0
     t.datetime "created_at", null: false
@@ -194,8 +193,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_02_20_175455) do
     t.string "password_reset_token"
     t.datetime "password_reset_sent_at"
     t.bigint "unit_id"
-    t.string "mobile_phone"
-    t.string "home_phone"
+    t.string "cell_phone"
     t.boolean "phone_verified", default: false, null: false
     t.date "move_in_date"
     t.date "move_out_date"

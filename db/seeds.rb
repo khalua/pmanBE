@@ -6,8 +6,7 @@ puts "Seeding database..."
 tenant = User.find_or_create_by!(email: "tenant@example.com") do |u|
   u.name = "John Doe"
   u.password = "password123"
-  u.phone = "555-123-4567"
-  u.mobile_phone = "555-123-4567"
+  u.cell_phone = "555-123-4567"
   u.address = "123 Main St, Apt 4B, City, State 12345"
   u.role = :tenant
 end
@@ -21,7 +20,7 @@ end
 manager = User.find_or_create_by!(email: "manager@example.com") do |u|
   u.name = "Jane Smith"
   u.password = "password123"
-  u.phone = "555-987-6543"
+  u.cell_phone = "555-987-6543"
   u.role = :property_manager
 end
 
@@ -57,18 +56,25 @@ vendors_data = [
 
   { name: "BugFree Pest Control", phone_number: "555-PST-0001", vendor_type: :pest_control, rating: 4.8, location: "Downtown", specialties: ["Roaches", "Ants", "Rodents"] },
   { name: "Shield Pest Solutions", phone_number: "555-PST-0002", vendor_type: :pest_control, rating: 4.6, location: "Midtown", specialties: ["Termites", "Bed bugs", "Wildlife"] },
-  { name: "EcoPest Management", phone_number: "555-PST-0003", vendor_type: :pest_control, rating: 4.9, location: "Uptown", specialties: ["Eco-friendly", "Prevention", "Commercial"] }
+  { name: "EcoPest Management", phone_number: "555-PST-0003", vendor_type: :pest_control, rating: 4.9, location: "Uptown", specialties: ["Eco-friendly", "Prevention", "Commercial"] },
+
+  { name: "Master Carpentry Co", phone_number: "555-CRP-0001", vendor_type: :carpentry, rating: 4.8, location: "Downtown", specialties: ["Door repair/replacement", "Window frames", "Cabinets"] },
+  { name: "WoodWorks Repair", phone_number: "555-CRP-0002", vendor_type: :carpentry, rating: 4.6, location: "Midtown", specialties: ["Locks & hardware", "Trim & molding", "Deck repair"] },
+  { name: "Precision Carpentry", phone_number: "555-CRP-0003", vendor_type: :carpentry, rating: 4.7, location: "Uptown", specialties: ["Structural wood", "Built-ins", "Custom work"] }
 ]
 
 vendors_data.each do |data|
-  Vendor.find_or_create_by!(name: data[:name]) do |v|
+  vendor = Vendor.find_or_create_by!(name: data[:name]) do |v|
     v.phone_number = data[:phone_number]
+    v.cell_phone = data[:phone_number]
     v.vendor_type = data[:vendor_type]
     v.rating = data[:rating]
     v.is_available = true
     v.location = data[:location]
     v.specialties = data[:specialties]
   end
+  # Backfill cell_phone for existing seed vendors that are missing it
+  vendor.update_columns(cell_phone: data[:phone_number]) if vendor.cell_phone.blank?
 end
 
 # Properties & Units

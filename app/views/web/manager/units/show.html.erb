@@ -1,0 +1,110 @@
+<% content_for(:title) { "Unit #{@unit.identifier} - #{@property.name || @property.address} - Prompt" } %>
+
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <%= link_to "← #{@property.name || @property.address}", web_manager_property_path(@property), class: "text-sm text-indigo-600 hover:text-indigo-800" %>
+
+  <div class="mt-3 flex justify-between items-center">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Unit <%= @unit.identifier %></h1>
+      <p class="mt-1 text-sm text-gray-500"><%= @property.name || @property.address %><% if @unit.floor.present? %> · Floor <%= @unit.floor %><% end %></p>
+    </div>
+    <div class="flex gap-3">
+      <%= link_to "Edit Unit", edit_web_manager_property_unit_path(@property, @unit), class: "inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50" %>
+      <% if @unit.vacant? %>
+        <%= link_to "Invite Tenant", web_manager_property_invitations_path(@property, unit_id: @unit.id), class: "inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700" %>
+      <% end %>
+    </div>
+  </div>
+
+  <%# Current tenants %>
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Tenants</h2>
+    <% current = @unit.current_tenants %>
+    <% past = @unit.past_tenants %>
+    <% if current.any? %>
+      <div class="space-y-3">
+        <% current.each do |tenant| %>
+          <div class="flex items-center justify-between">
+            <div>
+              <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "text-sm font-medium text-indigo-600 hover:text-indigo-800" %>
+              <p class="text-xs text-gray-400"><%= tenant.email %><% if tenant.cell_phone.present? %> · <%= format_phone(tenant.cell_phone) %><% end %></p>
+            </div>
+            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-800">Active</span>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-sm text-gray-400">No current tenants — unit is vacant.</p>
+    <% end %>
+
+    <% if past.any? %>
+      <div class="mt-4 pt-4 border-t border-gray-100">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Former Tenants</p>
+        <div class="space-y-2">
+          <% past.each do |tenant| %>
+            <div class="flex items-center justify-between">
+              <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "text-sm text-gray-600 hover:text-indigo-600" %>
+              <span class="text-xs text-gray-400"><% if tenant.move_out_date %>Moved out <%= tenant.move_out_date.strftime("%b %d, %Y") %><% end %></span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <%# Maintenance requests %>
+  <div class="mt-6 bg-white shadow rounded-lg p-6">
+    <h2 class="text-lg font-semibold text-gray-900 mb-4">Maintenance Requests</h2>
+    <% if @maintenance_requests.any? %>
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Issue</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Vendor</th>
+            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Last Updated</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% @maintenance_requests.each do |req| %>
+            <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_manager_maintenance_request_path(req) %>'">
+              <td class="px-4 py-2 text-sm text-gray-900"><%= req.issue_type %></td>
+              <td class="px-4 py-2">
+                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full
+                  <%= case req.severity
+                      when 'emergency' then 'bg-red-100 text-red-800'
+                      when 'urgent' then 'bg-orange-100 text-orange-800'
+                      when 'moderate' then 'bg-yellow-100 text-yellow-800'
+                      else 'bg-gray-100 text-gray-800'
+                      end %>">
+                  <%= req.severity.humanize %>
+                </span>
+              </td>
+              <td class="px-4 py-2">
+                <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full
+                  <%= case req.status
+                      when 'submitted' then 'bg-yellow-100 text-yellow-800'
+                      when 'vendor_quote_requested' then 'bg-purple-100 text-purple-800'
+                      when 'quote_received' then 'bg-blue-100 text-blue-800'
+                      when 'quote_accepted' then 'bg-green-100 text-green-800'
+                      when 'quote_rejected' then 'bg-red-100 text-red-800'
+                      when 'in_progress' then 'bg-blue-100 text-blue-800'
+                      when 'completed' then 'bg-green-100 text-green-800'
+                      when 'closed' then 'bg-gray-100 text-gray-600'
+                      else 'bg-gray-100 text-gray-800'
+                      end %>">
+                  <%= status_label(req.status) %>
+                </span>
+              </td>
+              <td class="px-4 py-2 text-sm text-gray-500"><%= req.assigned_vendor&.name || "-" %></td>
+              <td class="px-4 py-2 text-sm text-gray-400"><%= local_time(req.updated_at, format: :datetime) %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p class="text-sm text-gray-400">No maintenance requests for this unit.</p>
+    <% end %>
+  </div>
+</div>

@@ -18,7 +18,7 @@ class Web::Tenant::ProfilesController < WebController
   private
 
   def profile_params
-    params.require(:user).permit(:email, :mobile_phone, :home_phone)
+    params.require(:user).permit(:email, :cell_phone)
   end
 
   def require_tenant!

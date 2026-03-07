@@ -2,7 +2,15 @@ class Web::Manager::UnitsController < WebController
   before_action :authenticate_user!
   before_action :require_property_manager!
   before_action :set_property
-  before_action :set_unit, only: [ :edit, :update, :destroy ]
+  before_action :set_unit, only: [ :show, :edit, :update, :destroy ]
+
+  def show
+    @maintenance_requests = MaintenanceRequest
+      .joins(:tenant)
+      .where(users: { unit_id: @unit.id })
+      .includes(:assigned_vendor, tenant: {})
+      .order(updated_at: :desc)
+  end
 
   def new
     @unit = @property.units.build

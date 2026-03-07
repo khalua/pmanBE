@@ -18,7 +18,7 @@ class Api::VendorsController < Api::BaseController
     {
       id: v.id,
       name: v.name,
-      phone_number: v.phone_number,
+      cell_phone: v.cell_phone,
       rating: v.rating.to_f,
       is_available: v.is_available,
       location: v.location,

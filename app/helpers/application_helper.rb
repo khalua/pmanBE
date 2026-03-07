@@ -8,6 +8,19 @@ module ApplicationHelper
     "(#{digits[0..2]}) #{digits[3..5]} - #{digits[6..9]}"
   end
 
+  def status_label(status)
+    {
+      "submitted"              => "Submitted",
+      "vendor_quote_requested" => "Quotes Requested",
+      "quote_received"         => "Quote Received",
+      "quote_accepted"         => "Approved",
+      "quote_rejected"         => "Quote Rejected",
+      "in_progress"            => "In Progress",
+      "completed"              => "Completed",
+      "closed"                 => "Closed"
+    }.fetch(status.to_s, status.to_s.humanize)
+  end
+
   # Renders a <time> tag that JS converts to the user's local timezone.
   # format: :date ("Jan 15, 2025"), :datetime ("Jan 15, 2025 3:04 PM"), :short_date ("Jan 15")
   def local_time(time, format: :date)

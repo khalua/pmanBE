@@ -61,12 +61,8 @@
           <dd class="mt-1 text-sm text-gray-900"><%= @tenant.email %></dd>
         </div>
         <div>
-          <dt class="text-sm font-medium text-gray-500">Mobile Phone</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.mobile_phone.presence || "-" %></dd>
-        </div>
-        <div>
-          <dt class="text-sm font-medium text-gray-500">Home Phone</dt>
-          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.home_phone.presence || "-" %></dd>
+          <dt class="text-sm font-medium text-gray-500">Cell Phone</dt>
+          <dd class="mt-1 text-sm text-gray-900"><%= @tenant.cell_phone.presence || "-" %></dd>
         </div>
         <div>
           <dt class="text-sm font-medium text-gray-500">Property</dt>
@@ -180,7 +176,7 @@
                       when 'closed' then 'bg-gray-100 text-gray-600'
                       else 'bg-gray-100 text-gray-800'
                       end %>">
-                  <%= req.status.humanize %>
+                  <%= status_label(req.status) %>
                 </span>
               </td>
               <td class="px-4 py-3 text-sm text-gray-500"><%= req.assigned_vendor&.name || "-" %></td>

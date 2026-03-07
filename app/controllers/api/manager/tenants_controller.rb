@@ -44,7 +44,7 @@ class Api::Manager::TenantsController < Api::Manager::BaseController
       id: tenant.id,
       name: tenant.name,
       email: tenant.email,
-      mobile_phone: tenant.mobile_phone,
+      cell_phone: tenant.cell_phone,
       move_in_date: tenant.move_in_date,
       move_out_date: tenant.move_out_date,
       active: tenant.active,

@@ -67,7 +67,7 @@
             <tbody class="divide-y divide-gray-100">
               <% property.units.each do |unit| %>
                 <% current = unit.current_tenants %>
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="window.location='<%= web_manager_property_unit_path(property, unit) %>'">
                   <td class="pl-8 pr-4 py-2 text-sm font-medium text-gray-700"><%= unit.identifier %></td>
                   <td class="px-4 py-2 text-sm text-gray-400"><%= unit.floor || "—" %></td>
                   <td class="px-4 py-2">
@@ -80,7 +80,7 @@
                   <td class="px-4 py-2 text-sm text-gray-500">
                     <% if current.any? %>
                       <% current.each do |tenant| %>
-                        <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "text-indigo-600 hover:text-indigo-800 mr-2" %>
+                        <%= link_to tenant.name, web_manager_tenant_path(tenant), class: "text-indigo-600 hover:text-indigo-800 mr-2", onclick: "event.stopPropagation()" %>
                       <% end %>
                     <% else %>
                       <span class="text-gray-300">—</span>

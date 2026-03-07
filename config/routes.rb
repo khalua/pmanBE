@@ -44,14 +44,14 @@ Rails.application.routes.draw do
         end
       end
       resources :properties, only: [ :index, :show, :new, :create, :edit, :update, :destroy ] do
-        resources :units, only: [ :new, :create, :edit, :update, :destroy ]
+        resources :units, only: [ :show, :new, :create, :edit, :update, :destroy ]
         resources :invitations, only: [ :index, :create ] do
           member do
             post :revoke
           end
         end
       end
-      resources :maintenance_requests, only: [ :show ] do
+      resources :maintenance_requests, only: [ :index, :show ] do
         resources :quote_requests, only: [ :create ]
         member do
           post :create_note

@@ -74,7 +74,7 @@ class Api::Manager::VendorsController < Api::Manager::BaseController
 
   def vendor_params
     params.require(:vendor).permit(
-      :name, :vendor_type, :contact_name, :cell_phone, :phone_number,
+      :name, :vendor_type, :contact_name, :cell_phone,
       :email, :address, :website, :notes, :is_available,
       specialties: []
     )
@@ -86,7 +86,6 @@ class Api::Manager::VendorsController < Api::Manager::BaseController
       name: v.name,
       contact_name: v.contact_name,
       cell_phone: v.cell_phone,
-      phone_number: v.phone_number,
       email: v.email,
       vendor_type: v.vendor_type,
       address: v.address,

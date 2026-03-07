@@ -75,8 +75,8 @@ Rails.application.configure do
   config.action_mailer.default_url_options = { host: "pman-api.yerko.com", protocol: "https" }
 
   # Resend HTTP API
-  config.action_mailer.delivery_method = :resend
   Resend.api_key = ENV["RESEND_API_KEY"]
+  config.action_mailer.delivery_method = :resend
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
