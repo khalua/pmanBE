@@ -20,6 +20,6 @@ class QuoteRequestNotifier
            "Severity: #{@mr.severity}\n" \
            "Submit your quote here: #{link}"
 
-    VendorNotificationMailer.sms_simulation(@vendor.name, body).deliver_later
+    VendorNotificationMailer.sms_simulation(@vendor.name, body).deliver_now
   end
 end
