@@ -10,8 +10,6 @@ class QuoteRequestNotifier
   end
 
   def call
-    return unless @vendor.cell_phone.present?
-
     opts = Rails.application.config.action_mailer.default_url_options || { host: "localhost", port: 3000 }
     link = Rails.application.routes.url_helpers.quote_url(token: @qr.token, **opts)
 
